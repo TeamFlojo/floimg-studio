@@ -17,5 +17,5 @@ services:
       - ../.env
     ports:
       - "${FLOIMG_STUDIO_FE_PORT:-5173}:5173"
-      - "${FLOIMG_STUDIO_BE_PORT:-3001}:3001"
+      - "${FLOIMG_STUDIO_BE_PORT:-5100}:5100"
       - "${FLOIMG_STUDIO_CHROME_PORT:-9223}:9222"

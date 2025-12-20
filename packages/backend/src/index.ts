@@ -19,9 +19,14 @@ async function main() {
   // Initialize floimg client with plugins before anything else
   initializeClient();
 
-  // Register Fastify plugins
+  // CORS configuration - restrict to known origins in production
+  const corsOrigin = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(",")
+    : true; // Allow all in development
+
   await fastify.register(cors, {
-    origin: true,
+    origin: corsOrigin,
+    credentials: true,
   });
 
   await fastify.register(websocket);
@@ -54,7 +59,7 @@ async function main() {
   }
 
   // Start server
-  const port = parseInt(process.env.PORT || "3001", 10);
+  const port = parseInt(process.env.PORT || "5100", 10);
   const host = process.env.HOST || "0.0.0.0";
 
   try {

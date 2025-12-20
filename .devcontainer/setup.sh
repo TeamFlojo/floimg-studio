@@ -83,6 +83,6 @@ echo "  cc       - Run Claude Code with permission prompts"
 if [ "$IS_SANDBOX" = "1" ]; then
   echo "  ccdsp    - Run Claude Code without permission prompts (sandbox only)"
 fi
-echo "  pnpm dev - Start both frontend (5173) and backend (3001)"
+echo "  pnpm dev - Start both frontend (5173) and backend (5100)"
 echo ""
 echo "Aliases are available in all new terminal sessions."

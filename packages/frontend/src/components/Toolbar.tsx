@@ -28,7 +28,17 @@ export function Toolbar() {
     <>
       <div className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold text-gray-800">floimg Studio</h1>
+          <div className="flex items-baseline gap-2">
+            <h1 className="text-xl font-bold text-gray-800">floimg Studio</h1>
+            <a
+              href="https://flojo.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-gray-400 hover:text-gray-600"
+            >
+              by Flojo
+            </a>
+          </div>
           <span className="text-sm text-gray-500">
             {nodes.length} node{nodes.length !== 1 ? "s" : ""}
           </span>

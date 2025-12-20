@@ -57,14 +57,14 @@ COPY --from=builder /app/packages/frontend/dist ./packages/frontend/dist
 
 # Set environment variables
 ENV NODE_ENV=production
-ENV PORT=3001
+ENV PORT=5100
 
 # Expose port
-EXPOSE 3001
+EXPOSE 5100
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3001/api/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:5100/api/health || exit 1
 
 # Start the backend server
 WORKDIR /app/packages/backend

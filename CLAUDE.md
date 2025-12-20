@@ -17,7 +17,7 @@ pnpm install          # Install all dependencies
 pnpm dev              # Starts both frontend and backend
 
 # Or separately:
-pnpm --filter @floimg-studio/backend dev    # Port 3001
+pnpm --filter @floimg-studio/backend dev    # Port 5100
 pnpm --filter @floimg-studio/frontend dev   # Port 5173
 ```
 
@@ -145,7 +145,7 @@ If you see "Failed to fetch browser webSocket URL" - Chrome isn't running. Launc
 
 Dev servers write to log files that any Claude session can read:
 
-- `logs/backend.log` - Fastify backend (port 3001)
+- `logs/backend.log` - Fastify backend (port 5100)
 - `logs/frontend.log` - Vite frontend (port 5173)
 
 To check for errors, use the Read tool on these files or:

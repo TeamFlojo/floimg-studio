@@ -49,7 +49,7 @@ pnpm --filter @floimg-studio/shared build
 Start both backend and frontend in development mode:
 
 ```bash
-# Terminal 1 - Backend (port 3001)
+# Terminal 1 - Backend (port 5100)
 pnpm --filter @floimg-studio/backend dev
 
 # Terminal 2 - Frontend (port 5173)
