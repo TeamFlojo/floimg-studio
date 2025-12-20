@@ -1,9 +1,15 @@
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import websocket from "@fastify/websocket";
 import multipart from "@fastify/multipart";
+import fastifyStatic from "@fastify/static";
 import { registerRoutes } from "./routes/index.js";
 import { initializeClient } from "./floimg/setup.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const fastify = Fastify({
   logger: true,
@@ -28,6 +34,24 @@ async function main() {
 
   // Register routes
   await registerRoutes(fastify);
+
+  // In production, serve the frontend static files
+  if (process.env.NODE_ENV === "production") {
+    const frontendPath = join(__dirname, "../../frontend/dist");
+    await fastify.register(fastifyStatic, {
+      root: frontendPath,
+      prefix: "/",
+    });
+
+    // Fallback to index.html for SPA routing
+    fastify.setNotFoundHandler((request, reply) => {
+      if (request.url.startsWith("/api/")) {
+        reply.status(404).send({ error: "Not found" });
+      } else {
+        reply.sendFile("index.html");
+      }
+    });
+  }
 
   // Start server
   const port = parseInt(process.env.PORT || "3001", 10);

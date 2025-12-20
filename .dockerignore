@@ -1,0 +1,41 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Build outputs (rebuilt in container)
+dist
+**/dist
+
+# Development files
+.git
+.gitignore
+*.md
+LICENSE
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+
+# Environment files (use Coolify env vars instead)
+.env
+.env.*
+!.env.example
+
+# Logs
+logs
+*.log
+
+# Claude/AI config
+.claude
+.mcp.json
+CLAUDE.md
+vault
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Dev containers (not needed for production)
+.devcontainer
