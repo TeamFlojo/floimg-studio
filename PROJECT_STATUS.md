@@ -10,7 +10,7 @@ No active tasks. Use `/p [description]` to plan new work.
 
 - Initial project setup (v0.1.0)
 - React Flow visual editor foundation
-- Fastify backend with imgflo integration
+- Fastify backend with floimg integration
 - Claude Code meta-framework setup
 
 ## Next Up
@@ -24,5 +24,5 @@ No active tasks. Use `/p [description]` to plan new work.
 ## Notes
 
 - Early stage project (v0.1.0)
-- Depends on imgflo ^0.4.3
+- Depends on floimg ^0.4.3
 - Private repository

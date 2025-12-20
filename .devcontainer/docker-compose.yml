@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    container_name: ${CONTAINER_PREFIX:-imgflo-studio}_app
+    container_name: ${CONTAINER_PREFIX:-floimg-studio}_app
     build:
       context: .
       dockerfile: Dockerfile
@@ -16,6 +16,6 @@ services:
     env_file:
       - ../.env
     ports:
-      - "${IMGFLO_STUDIO_FE_PORT:-5173}:5173"
-      - "${IMGFLO_STUDIO_BE_PORT:-3001}:3001"
-      - "${IMGFLO_STUDIO_CHROME_PORT:-9223}:9222"
+      - "${FLOIMG_STUDIO_FE_PORT:-5173}:5173"
+      - "${FLOIMG_STUDIO_BE_PORT:-3001}:3001"
+      - "${FLOIMG_STUDIO_CHROME_PORT:-9223}:9222"

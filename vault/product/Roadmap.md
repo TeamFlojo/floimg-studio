@@ -1,10 +1,10 @@
 # Roadmap
 
-High-level direction for imgflo-studio development.
+High-level direction for floimg-studio development.
 
 ## Vision
 
-imgflo-studio is a visual workflow builder that makes imgflo accessible to non-developers. It provides a drag-and-drop interface for creating image generation and manipulation workflows.
+floimg-studio is a visual workflow builder that makes floimg accessible to non-developers. It provides a drag-and-drop interface for creating image generation and manipulation workflows.
 
 ## Current State (v0.1.0)
 
@@ -45,11 +45,11 @@ imgflo-studio is a visual workflow builder that makes imgflo accessible to non-d
 - Loading states
 - Error feedback
 
-## Integration with imgflo
+## Integration with floimg
 
-imgflo-studio depends on the imgflo core package:
-- Node definitions derived from imgflo schemas
-- Workflow execution uses imgflo engine
+floimg-studio depends on the floimg core package:
+- Node definitions derived from floimg schemas
+- Workflow execution uses floimg engine
 - Version coordination managed via parent repo
 
 ## Non-Goals

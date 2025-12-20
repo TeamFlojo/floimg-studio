@@ -15,7 +15,7 @@ import type {
 import { getCachedCapabilities } from "./setup.js";
 
 /**
- * Convert imgflo ParameterSchema to studio ParamField
+ * Convert floimg ParameterSchema to studio ParamField
  */
 function parameterToField(schema: ParameterSchema): ParamField {
   return {
@@ -35,7 +35,7 @@ function parameterToField(schema: ParameterSchema): ParamField {
 }
 
 /**
- * Convert imgflo GeneratorSchema to studio NodeDefinition
+ * Convert floimg GeneratorSchema to studio NodeDefinition
  */
 function generatorToNode(schema: GeneratorSchema): NodeDefinition {
   return {
@@ -56,7 +56,7 @@ function generatorToNode(schema: GeneratorSchema): NodeDefinition {
 }
 
 /**
- * Convert imgflo TransformOperationSchema to studio NodeDefinition
+ * Convert floimg TransformOperationSchema to studio NodeDefinition
  */
 function transformToNode(schema: TransformOperationSchema): NodeDefinition {
   return {
@@ -108,7 +108,7 @@ export function getTransforms(): NodeDefinition[] {
 }
 
 /**
- * Get input node definitions (not from imgflo, these are studio-specific)
+ * Get input node definitions (not from floimg, these are studio-specific)
  */
 export function getInputNodes(): NodeDefinition[] {
   return [

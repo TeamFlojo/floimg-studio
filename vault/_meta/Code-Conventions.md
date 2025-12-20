@@ -1,6 +1,6 @@
 # Code Conventions
 
-Standards for code in imgflo-studio.
+Standards for code in floimg-studio.
 
 ## TypeScript
 

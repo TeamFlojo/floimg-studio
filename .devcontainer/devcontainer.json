@@ -1,8 +1,8 @@
 {
-  "name": "imgflo-studio",
+  "name": "floimg-studio",
   "dockerComposeFile": "docker-compose.yml",
   "service": "app",
-  "workspaceFolder": "/workspaces/imgflo-studio",
+  "workspaceFolder": "/workspaces/floimg-studio",
 
   "customizations": {
     "vscode": {
@@ -35,7 +35,7 @@
     }
   },
 
-  "postCreateCommand": "bash /workspaces/imgflo-studio/.devcontainer/setup.sh",
+  "postCreateCommand": "bash /workspaces/floimg-studio/.devcontainer/setup.sh",
 
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},

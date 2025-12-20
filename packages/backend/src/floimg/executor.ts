@@ -128,7 +128,7 @@ async function executeNode(
     const input = variables.get(inputEdge.source);
     if (!input) throw new Error(`Input not found for node ${node.id}`);
 
-    // Extract 'to' from params for convert operation (imgflo expects it at top level)
+    // Extract 'to' from params for convert operation (floimg expects it at top level)
     const { to, ...restParams } = data.params as { to?: string; [key: string]: unknown };
 
     const result = await client.transform({

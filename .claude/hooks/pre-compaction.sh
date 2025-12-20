@@ -1,5 +1,5 @@
 #!/bin/bash
-# Pre-compaction hook for imgflo-studio
+# Pre-compaction hook for floimg-studio
 
 echo "Context compaction detected."
 echo ""

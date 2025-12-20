@@ -1,6 +1,6 @@
 # Vault Writing Guidelines
 
-Standards for documentation in the imgflo-studio vault.
+Standards for documentation in the floimg-studio vault.
 
 ## Document Types
 

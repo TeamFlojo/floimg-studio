@@ -1,5 +1,5 @@
 /**
- * Shared types for imgflo-studio
+ * Shared types for floimg-studio
  */
 
 // Node types in the visual editor

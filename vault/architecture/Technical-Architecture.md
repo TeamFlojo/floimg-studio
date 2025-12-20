@@ -1,10 +1,10 @@
 # Technical Architecture
 
-imgflo-studio system architecture.
+floimg-studio system architecture.
 
 ## Overview
 
-imgflo-studio is a visual workflow builder that provides a drag-and-drop interface for creating imgflo workflows.
+floimg-studio is a visual workflow builder that provides a drag-and-drop interface for creating floimg workflows.
 
 ```
 ┌─────────────────────────────────────────┐
@@ -30,7 +30,7 @@ imgflo-studio is a visual workflow builder that provides a drag-and-drop interfa
 │  │  /api/nodes, /api/execute, etc. │   │
 │  └─────────────────────────────────┘   │
 │  ┌─────────────────────────────────┐   │
-│  │       imgflo Integration        │   │
+│  │       floimg Integration        │   │
 │  │  (Registry, Executor)           │   │
 │  └─────────────────────────────────┘   │
 │  ┌─────────────────────────────────┐   │
@@ -41,25 +41,25 @@ imgflo-studio is a visual workflow builder that provides a drag-and-drop interfa
                     │
                     ▼
 ┌─────────────────────────────────────────┐
-│              imgflo Core                │
+│              floimg Core                │
 │    (Image Generation & Transforms)      │
 └─────────────────────────────────────────┘
 ```
 
 ## Package Structure
 
-### @imgflo-studio/frontend
+### @floimg-studio/frontend
 - **Framework**: React 19 + Vite
 - **Visual Editor**: React Flow for node-based editing
 - **State**: Zustand for local state, TanStack Query for server state
 - **Styling**: Tailwind CSS
 
-### @imgflo-studio/backend
+### @floimg-studio/backend
 - **Framework**: Fastify 5
 - **Plugins**: CORS, Multipart uploads, WebSocket
-- **Integration**: imgflo for workflow execution
+- **Integration**: floimg for workflow execution
 
-### @imgflo-studio/shared
+### @floimg-studio/shared
 - TypeScript type definitions shared between packages
 
 ## Data Flow
@@ -72,8 +72,8 @@ imgflo-studio is a visual workflow builder that provides a drag-and-drop interfa
 
 ### Workflow Execution
 1. Frontend sends workflow to `/api/execute`
-2. Backend converts visual workflow to imgflo format
-3. imgflo executes the workflow
+2. Backend converts visual workflow to floimg format
+3. floimg executes the workflow
 4. Results returned to frontend
 5. Generated images stored and displayed
 
@@ -100,18 +100,18 @@ imgflo-studio is a visual workflow builder that provides a drag-and-drop interfa
 - Uploaded images
 - Execution results
 
-## imgflo Integration
+## floimg Integration
 
 ### Capability Auto-Discovery
 
-imgflo-studio uses imgflo's `getCapabilities()` API to auto-discover available generators and transforms. This ensures the visual editor always reflects what the execution engine supports.
+floimg-studio uses floimg's `getCapabilities()` API to auto-discover available generators and transforms. This ensures the visual editor always reflects what the execution engine supports.
 
 ```
 ┌─────────────────────────────────────────┐
 │           Backend Startup               │
 ├─────────────────────────────────────────┤
 │ 1. initializeClient() called            │
-│    - Creates imgflo client              │
+│    - Creates floimg client              │
 │    - Registers generator plugins        │
 │    - Caches capabilities                │
 │                                         │
@@ -121,20 +121,20 @@ imgflo-studio uses imgflo's `getCapabilities()` API to auto-discover available g
 │    - saveProviders[]                    │
 │                                         │
 │ 3. Registry converts schemas            │
-│    - imgflo schemas → NodeDefinitions   │
+│    - floimg schemas → NodeDefinitions   │
 │    - Served via /api/nodes/*            │
 └─────────────────────────────────────────┘
 ```
 
 ### Plugin Registration
 
-Generators are registered in `src/imgflo/setup.ts`:
+Generators are registered in `src/floimg/setup.ts`:
 
 ```typescript
-import { createClient } from "imgflo";
-import qr from "imgflo-qr";
-import mermaid from "imgflo-mermaid";
-import quickchart from "imgflo-quickchart";
+import { createClient } from "floimg";
+import qr from "floimg-qr";
+import mermaid from "floimg-mermaid";
+import quickchart from "floimg-quickchart";
 
 const client = createClient({...});
 client.registerGenerator(qr());
@@ -144,9 +144,9 @@ client.registerGenerator(quickchart());
 
 ### Schema Mapping
 
-imgflo schemas are converted to studio NodeDefinitions:
+floimg schemas are converted to studio NodeDefinitions:
 
-| imgflo Type | Studio Type |
+| floimg Type | Studio Type |
 |-------------|-------------|
 | `GeneratorSchema` | `NodeDefinition` (type: "generator") |
 | `TransformOperationSchema` | `NodeDefinition` (type: "transform") |
@@ -154,25 +154,25 @@ imgflo schemas are converted to studio NodeDefinitions:
 
 ### Dependencies
 
-imgflo packages are installed from npm:
+floimg packages are installed from npm:
 
 ```json
 {
   "dependencies": {
-    "imgflo": "^0.5.0",
-    "imgflo-qr": "^0.2.0",
-    "imgflo-mermaid": "^0.2.0",
-    "imgflo-quickchart": "^0.2.0"
+    "floimg": "^0.5.0",
+    "floimg-qr": "^0.2.0",
+    "floimg-mermaid": "^0.2.0",
+    "floimg-quickchart": "^0.2.0"
   }
 }
 ```
 
-For local development with unpublished imgflo changes, add `"../imgflo/packages/*"` to `pnpm-workspace.yaml` and use `workspace:*` protocol.
+For local development with unpublished floimg changes, add `"../floimg/packages/*"` to `pnpm-workspace.yaml` and use `workspace:*` protocol.
 
 ### Key Files
 
 | File | Purpose |
 |------|---------|
-| `src/imgflo/setup.ts` | Client initialization and plugin registration |
-| `src/imgflo/registry.ts` | Schema conversion and capability exposure |
-| `src/imgflo/executor.ts` | Workflow execution using shared client |
+| `src/floimg/setup.ts` | Client initialization and plugin registration |
+| `src/floimg/registry.ts` | Schema conversion and capability exposure |
+| `src/floimg/executor.ts` | Workflow execution using shared client |

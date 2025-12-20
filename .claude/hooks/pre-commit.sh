@@ -1,5 +1,5 @@
 #!/bin/bash
-# Pre-commit hook for imgflo-studio
+# Pre-commit hook for floimg-studio
 
 set -e
 
