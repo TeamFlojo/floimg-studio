@@ -48,9 +48,9 @@ COPY packages/backend/package.json ./packages/backend/
 # Install production dependencies only
 RUN pnpm install --frozen-lockfile --prod
 
-# Copy built backend
+# Copy built backend and shared
 COPY --from=builder /app/packages/backend/dist ./packages/backend/dist
-COPY --from=builder /app/packages/shared/dist ./packages/shared/dist 2>/dev/null || true
+COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 
 # Copy frontend static build to be served by backend
 COPY --from=builder /app/packages/frontend/dist ./packages/frontend/dist
