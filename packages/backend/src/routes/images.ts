@@ -11,7 +11,8 @@ export async function imagesRoutes(fastify: FastifyInstance) {
       const files = await readdir(OUTPUT_DIR);
       const images = await Promise.all(
         files
-          .filter((f) => /\.(png|jpg|jpeg|webp|svg)$/i.test(f))
+          // Filter to image files only (exclude .meta.json files)
+          .filter((f) => /\.(png|jpg|jpeg|webp|svg|avif)$/i.test(f))
           .map(async (filename) => {
             const filePath = join(OUTPUT_DIR, filename);
             const stats = await stat(filePath);
@@ -76,13 +77,13 @@ export async function imagesRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // Get image metadata
+  // Get image metadata (basic)
   fastify.get<{ Params: { id: string } }>("/:id", async (request, reply) => {
     const { id } = request.params;
 
     try {
       const files = await readdir(OUTPUT_DIR);
-      const file = files.find((f) => f.startsWith(id));
+      const file = files.find((f) => f.startsWith(id) && !f.endsWith(".meta.json"));
 
       if (!file) {
         reply.code(404);
@@ -109,6 +110,22 @@ export async function imagesRoutes(fastify: FastifyInstance) {
     } catch (error) {
       reply.code(404);
       return { error: "Image not found" };
+    }
+  });
+
+  // Get full image metadata with workflow info (from sidecar file)
+  fastify.get<{ Params: { id: string } }>("/:id/workflow", async (request, reply) => {
+    const { id } = request.params;
+
+    try {
+      const metadataPath = join(OUTPUT_DIR, `${id}.meta.json`);
+      const metadataJson = await readFile(metadataPath, "utf-8");
+      const metadata = JSON.parse(metadataJson);
+      return metadata;
+    } catch (error) {
+      // Sidecar file may not exist for older images
+      reply.code(404);
+      return { error: "Workflow metadata not found for this image" };
     }
   });
 }

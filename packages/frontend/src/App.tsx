@@ -1,18 +1,50 @@
-import { useState, useCallback, DragEvent } from "react";
+import { useState, useCallback, useEffect, DragEvent } from "react";
 import { ReactFlowProvider } from "reactflow";
 import { WorkflowEditor } from "./editor/WorkflowEditor";
 import { NodePalette } from "./components/NodePalette";
 import { NodeInspector } from "./components/NodeInspector";
 import { Toolbar } from "./components/Toolbar";
 import { Gallery } from "./components/Gallery";
+import { TemplateGallery } from "./components/TemplateGallery";
+import { TOSConsent, useTOSConsent } from "./components/TOSConsent";
 import { useWorkflowStore } from "./stores/workflowStore";
+import { getTemplateById } from "./templates";
 import type { NodeDefinition } from "@floimg-studio/shared";
 
-type TabType = "editor" | "gallery";
+type TabType = "editor" | "gallery" | "templates";
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabType>("editor");
   const addNode = useWorkflowStore((s) => s.addNode);
+  const loadTemplate = useWorkflowStore((s) => s.loadTemplate);
+  const { hasConsent, isLoading: tosLoading, grantConsent } = useTOSConsent();
+
+  // Handle ?template=<id> URL parameter
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const templateId = params.get("template");
+
+    if (templateId) {
+      const template = getTemplateById(templateId);
+      if (template) {
+        loadTemplate(template);
+        // Clean up URL without reload
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+    }
+  }, [loadTemplate]);
+
+  // Handler for template selection (from TemplateGallery)
+  const handleTemplateSelect = useCallback(
+    (templateId: string) => {
+      const template = getTemplateById(templateId);
+      if (template) {
+        loadTemplate(template);
+        setActiveTab("editor");
+      }
+    },
+    [loadTemplate]
+  );
 
   // Handle drop from palette
   const handleDrop = useCallback(
@@ -50,8 +82,20 @@ function App() {
     event.dataTransfer.dropEffect = "move";
   }, []);
 
+  // Show loading state while checking TOS consent
+  if (tosLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-100 dark:bg-zinc-900">
+        <div className="text-gray-500 dark:text-zinc-400">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <ReactFlowProvider>
+      {/* TOS Consent Modal - shown on first use */}
+      {!hasConsent && <TOSConsent onAccept={grantConsent} />}
+
       <div className="h-screen flex flex-col bg-gray-100 dark:bg-zinc-900">
         <Toolbar />
 
@@ -78,12 +122,22 @@ function App() {
             >
               Gallery
             </button>
+            <button
+              onClick={() => setActiveTab("templates")}
+              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "templates"
+                  ? "border-violet-500 text-violet-600 dark:text-violet-400"
+                  : "border-transparent text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200"
+              }`}
+            >
+              Templates
+            </button>
           </div>
         </div>
 
         {/* Main content */}
         <div className="flex-1 flex overflow-hidden">
-          {activeTab === "editor" ? (
+          {activeTab === "editor" && (
             <>
               <NodePalette />
               <div
@@ -95,9 +149,15 @@ function App() {
               </div>
               <NodeInspector />
             </>
-          ) : (
+          )}
+          {activeTab === "gallery" && (
             <div className="flex-1 overflow-auto">
               <Gallery />
+            </div>
+          )}
+          {activeTab === "templates" && (
+            <div className="flex-1 overflow-auto">
+              <TemplateGallery onSelect={handleTemplateSelect} />
             </div>
           )}
         </div>

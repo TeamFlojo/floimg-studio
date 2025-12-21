@@ -16,11 +16,17 @@ import type {
   SaveNodeData,
   InputNodeData,
   ExecutionStepResult,
+  ImageMetadata,
 } from "@floimg-studio/shared";
 import { loadUpload } from "../routes/uploads.js";
 import { nanoid } from "nanoid";
 import { mkdir, writeFile } from "fs/promises";
 import { join, dirname } from "path";
+import {
+  isModerationEnabled,
+  moderateImage,
+  logModerationIncident,
+} from "../moderation/index.js";
 
 // Output directory for generated images
 const OUTPUT_DIR = "./data/images";
@@ -38,6 +44,13 @@ export interface ExecutionCallbacks {
   onStep?: (result: ExecutionStepResult) => void;
   onComplete?: (imageIds: string[]) => void;
   onError?: (error: string) => void;
+}
+
+export interface ExecutionOptions {
+  /** Optional template ID if workflow was loaded from a template */
+  templateId?: string;
+  /** Callbacks for execution events */
+  callbacks?: ExecutionCallbacks;
 }
 
 export interface ExecutionResult {
@@ -215,8 +228,9 @@ async function executeNode(
 export async function executeWorkflow(
   nodes: StudioNode[],
   edges: StudioEdge[],
-  callbacks?: ExecutionCallbacks
+  options?: ExecutionOptions
 ): Promise<ExecutionResult> {
+  const { templateId, callbacks } = options || {};
   const imageIds: string[] = [];
   const images = new Map<string, Buffer>();
   const nodeIdByImageId = new Map<string, string>();
@@ -280,15 +294,48 @@ export async function executeWorkflow(
 
             // Store result for downstream nodes
             if (result) {
+              // SCAN BEFORE SAVE: Moderate image before writing to disk
+              if (isModerationEnabled()) {
+                const moderationResult = await moderateImage(result.bytes, result.mime);
+                if (moderationResult.flagged) {
+                  logModerationIncident("generated", moderationResult, {
+                    nodeId: node.id,
+                    nodeType: node.type,
+                  });
+                  throw new Error(
+                    `Content policy violation: Image flagged for ${moderationResult.flaggedCategories.join(", ")}. ` +
+                    `This content cannot be saved.`
+                  );
+                }
+              }
+
               variables.set(node.id, result);
 
-              // Save intermediate image
+              // Save intermediate image (only reached if moderation passed)
               const imageId = `img_${Date.now()}_${nanoid(6)}`;
               const ext = MIME_TO_EXT[result.mime] || "png";
-              const imagePath = join(OUTPUT_DIR, `${imageId}.${ext}`);
+              const filename = `${imageId}.${ext}`;
+              const imagePath = join(OUTPUT_DIR, filename);
 
               await mkdir(dirname(imagePath), { recursive: true });
               await writeFile(imagePath, result.bytes);
+
+              // Write metadata sidecar file (enables "what workflow created this?" queries)
+              const metadata: ImageMetadata = {
+                id: imageId,
+                filename,
+                mime: result.mime,
+                size: result.bytes.length,
+                createdAt: Date.now(),
+                workflow: {
+                  nodes,
+                  edges,
+                  executedAt: Date.now(),
+                  templateId,
+                },
+              };
+              const metadataPath = join(OUTPUT_DIR, `${imageId}.meta.json`);
+              await writeFile(metadataPath, JSON.stringify(metadata, null, 2));
 
               imageIds.push(imageId);
               images.set(imageId, result.bytes);

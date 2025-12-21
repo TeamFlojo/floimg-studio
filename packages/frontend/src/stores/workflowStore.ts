@@ -6,6 +6,7 @@ import type {
   SaveNodeData,
   InputNodeData,
   NodeDefinition,
+  GalleryTemplate,
 } from "@floimg-studio/shared";
 import { executeWorkflow, exportYaml } from "../api/client";
 
@@ -26,6 +27,11 @@ interface WorkflowStore {
   nodes: Node<NodeData>[];
   edges: Edge[];
   selectedNodeId: string | null;
+
+  // Template tracking
+  currentTemplateId: string | null;
+  loadTemplate: (template: GalleryTemplate) => void;
+  clearWorkflow: () => void;
 
   // Preview visibility per node (default: true)
   previewVisible: Record<string, boolean>;
@@ -69,6 +75,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   nodes: [],
   edges: [],
   selectedNodeId: null,
+  currentTemplateId: null,
   previewVisible: {},
   generators: [],
   transforms: [],
@@ -78,6 +85,65 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     imageIds: [],
     previews: {},
     nodeStatus: {},
+  },
+
+  loadTemplate: (template) => {
+    // Convert StudioNodes to React Flow nodes with new IDs
+    const idMap = new Map<string, string>();
+
+    const nodes: Node<NodeData>[] = template.workflow.nodes.map((studioNode) => {
+      const newId = generateNodeId();
+      idMap.set(studioNode.id, newId);
+
+      return {
+        id: newId,
+        type: studioNode.type,
+        position: studioNode.position,
+        data: studioNode.data as NodeData,
+      };
+    });
+
+    // Convert edges with mapped IDs
+    const edges: Edge[] = template.workflow.edges.map((studioEdge) => {
+      const newSource = idMap.get(studioEdge.source) || studioEdge.source;
+      const newTarget = idMap.get(studioEdge.target) || studioEdge.target;
+
+      return {
+        id: `edge_${newSource}_${newTarget}`,
+        source: newSource,
+        target: newTarget,
+      };
+    });
+
+    set({
+      nodes,
+      edges,
+      selectedNodeId: null,
+      currentTemplateId: template.id,
+      previewVisible: {},
+      execution: {
+        status: "idle",
+        imageIds: [],
+        previews: {},
+        nodeStatus: {},
+      },
+    });
+  },
+
+  clearWorkflow: () => {
+    set({
+      nodes: [],
+      edges: [],
+      selectedNodeId: null,
+      currentTemplateId: null,
+      previewVisible: {},
+      execution: {
+        status: "idle",
+        imageIds: [],
+        previews: {},
+        nodeStatus: {},
+      },
+    });
   },
 
   togglePreview: (id) => {

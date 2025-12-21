@@ -199,3 +199,91 @@ export interface WSExecutionError extends WSEvent {
     error: string;
   };
 }
+
+// ============================================
+// Template System Types
+// ============================================
+
+/**
+ * A bundled workflow template that can be loaded into the editor
+ */
+export interface GalleryTemplate {
+  /** Unique identifier for the template (e.g., "sales-dashboard") */
+  id: string;
+  /** Display name (e.g., "Sales Dashboard") */
+  name: string;
+  /** Short description (e.g., "Bar chart with quarterly revenue") */
+  description: string;
+  /** Category for filtering (e.g., "Charts", "Diagrams", "QR Codes") */
+  category: string;
+  /** Primary generator used (e.g., "quickchart", "mermaid", "qr") */
+  generator: string;
+  /** Optional tags for search */
+  tags?: string[];
+  /** The workflow definition */
+  workflow: {
+    nodes: StudioNode[];
+    edges: StudioEdge[];
+  };
+  /** Optional preview image info */
+  preview?: {
+    /** URL to preview image (e.g., "/templates/sales-dashboard.png") */
+    imageUrl: string;
+    width: number;
+    height: number;
+  };
+}
+
+/**
+ * Metadata stored alongside generated images (sidecar files)
+ * Enables "what workflow created this image?" queries
+ */
+export interface ImageMetadata {
+  /** Image identifier */
+  id: string;
+  /** Filename on disk */
+  filename: string;
+  /** MIME type */
+  mime: string;
+  /** File size in bytes */
+  size: number;
+  /** Creation timestamp */
+  createdAt: number;
+  /** Workflow that created this image (if available) */
+  workflow?: {
+    nodes: StudioNode[];
+    edges: StudioEdge[];
+    /** When the workflow was executed */
+    executedAt: number;
+    /** Template ID if created from a template */
+    templateId?: string;
+  };
+}
+
+/**
+ * Content moderation result (used by moderation service)
+ */
+export interface ModerationResult {
+  /** Whether the content is safe */
+  safe: boolean;
+  /** Whether the content was flagged */
+  flagged: boolean;
+  /** Individual category flags */
+  categories: {
+    sexual: boolean;
+    sexualMinors: boolean;
+    hate: boolean;
+    hateThreatening: boolean;
+    harassment: boolean;
+    harassmentThreatening: boolean;
+    selfHarm: boolean;
+    selfHarmIntent: boolean;
+    selfHarmInstructions: boolean;
+    violence: boolean;
+    violenceGraphic: boolean;
+  };
+  /** Raw category scores (0-1) */
+  categoryScores: Record<string, number>;
+  /** List of categories that were flagged */
+  flaggedCategories: string[];
+}

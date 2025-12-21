@@ -47,6 +47,9 @@ importers:
       nanoid:
         specifier: ^5.0.7
         version: 5.1.6
+      openai:
+        specifier: ^4.76.0
+        version: 4.104.0(ws@8.18.3)(zod@3.25.76)
       yaml:
         specifier: ^2.4.1
         version: 2.8.2

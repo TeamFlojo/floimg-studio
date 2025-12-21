@@ -2,6 +2,11 @@ import type { FastifyInstance } from "fastify";
 import { mkdir, writeFile, readFile, readdir, unlink, stat } from "fs/promises";
 import { join, extname } from "path";
 import { nanoid } from "nanoid";
+import {
+  isModerationEnabled,
+  moderateImage,
+  logModerationIncident,
+} from "../moderation/index.js";
 
 // Directory for uploaded images
 const UPLOADS_DIR = "./data/uploads";
@@ -108,7 +113,28 @@ export async function uploadsRoutes(fastify: FastifyInstance) {
       return { error: "File too large. Maximum size is 10MB." };
     }
 
-    // Save file
+    // SCAN BEFORE SAVE: Moderate image before writing to disk
+    if (isModerationEnabled()) {
+      try {
+        const moderationResult = await moderateImage(buffer, mime);
+        if (moderationResult.flagged) {
+          logModerationIncident("uploaded", moderationResult, {
+            originalFilename: data.filename,
+            mime,
+            size: buffer.length,
+          });
+          reply.code(400);
+          return {
+            error: `Content policy violation: This image was flagged for ${moderationResult.flaggedCategories.join(", ")}. Upload rejected.`,
+          };
+        }
+      } catch (moderationError) {
+        // Log but don't block if moderation service fails
+        console.error("Moderation check failed:", moderationError);
+      }
+    }
+
+    // Save file (only reached if moderation passed)
     await writeFile(filePath, buffer);
 
     const metadata: UploadMetadata = {

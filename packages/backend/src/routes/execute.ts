@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import type { StudioNode, StudioEdge } from "@floimg-studio/shared";
+import type { StudioNode, StudioEdge, ExecutionStepResult } from "@floimg-studio/shared";
 import { executeWorkflow, toPipeline } from "../floimg/executor.js";
 import { stringify as yamlStringify } from "yaml";
 import { nanoid } from "nanoid";
@@ -39,23 +39,25 @@ export async function executeRoutes(fastify: FastifyInstance) {
 
     // Execute asynchronously
     executeWorkflow(nodes, edges, {
-      onStep: (result) => {
-        fastify.log.info(`Step ${result.stepIndex}: ${result.status}`);
+      callbacks: {
+        onStep: (result: ExecutionStepResult) => {
+          fastify.log.info(`Step ${result.stepIndex}: ${result.status}`);
+        },
+        onComplete: (imageIds: string[]) => {
+          executionResults.set(executionId, {
+            status: "completed",
+            imageIds,
+          });
+        },
+        onError: (error: string) => {
+          executionResults.set(executionId, {
+            status: "error",
+            imageIds: [],
+            error,
+          });
+        },
       },
-      onComplete: (imageIds) => {
-        executionResults.set(executionId, {
-          status: "completed",
-          imageIds,
-        });
-      },
-      onError: (error) => {
-        executionResults.set(executionId, {
-          status: "error",
-          imageIds: [],
-          error,
-        });
-      },
-    }).catch((err) => {
+    }).catch((err: unknown) => {
       fastify.log.error(err);
     });
 

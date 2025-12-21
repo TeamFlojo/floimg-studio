@@ -7,6 +7,7 @@ import multipart from "@fastify/multipart";
 import fastifyStatic from "@fastify/static";
 import { registerRoutes } from "./routes/index.js";
 import { initializeClient } from "./floimg/setup.js";
+import { initModeration } from "./moderation/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -18,6 +19,9 @@ const fastify = Fastify({
 async function main() {
   // Initialize floimg client with plugins before anything else
   initializeClient();
+
+  // Initialize content moderation (requires OPENAI_API_KEY)
+  initModeration();
 
   // CORS configuration - restrict to known origins in production
   const corsOrigin = process.env.CORS_ORIGIN
