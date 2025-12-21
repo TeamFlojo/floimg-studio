@@ -176,3 +176,165 @@ For local development with unpublished floimg changes, add `"../floimg/packages/
 | `src/floimg/setup.ts` | Client initialization and plugin registration |
 | `src/floimg/registry.ts` | Schema conversion and capability exposure |
 | `src/floimg/executor.ts` | Workflow execution using shared client |
+
+## Content Moderation
+
+floimg-studio includes content moderation to prevent harmful content from being generated or stored.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│              SCAN BEFORE SAVE - Content Moderation              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Image in memory (buffer, not saved yet)                         │
+│           │                                                       │
+│           ▼                                                       │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │  OpenAI Moderation API (FREE)                                │ │
+│  │  - Checks: hate, violence, sexual, self-harm, harassment    │ │
+│  │  - Returns: flagged (true/false) + categories + scores      │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+│           │                                                       │
+│           ▼                                                       │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │  DECISION (before any disk write)                            │ │
+│  │  ✅ PASS: Write to disk, show in gallery                    │ │
+│  │  ❌ FLAGGED: Discard buffer, return error, log incident     │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Configuration
+
+| Environment Variable | Default | Description |
+|----------------------|---------|-------------|
+| `OPENAI_API_KEY` | (required) | API key for OpenAI Moderation |
+| `MODERATION_STRICT_MODE` | `true` for cloud | Block on moderation service failure |
+| `FLOIMG_CLOUD` | `false` | Enable cloud deployment mode |
+
+### Strict Mode Behavior
+
+| Scenario | Strict Mode ON | Strict Mode OFF |
+|----------|----------------|-----------------|
+| Moderation API available | Normal scanning | Normal scanning |
+| Moderation API fails | Block content (503) | Allow with warning |
+| Content flagged | Always blocked | Always blocked |
+
+### Incident Logging
+
+All moderation events are logged to `data/moderation/incidents.jsonl`:
+- Flagged content (rejected)
+- Moderation service errors
+- Context (nodeId, uploadId, etc.)
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/moderation/moderator.ts` | OpenAI Moderation API integration |
+| `src/moderation/index.ts` | Exports and initialization |
+
+## Template System
+
+floimg-studio includes bundled workflow templates that work offline for self-hosted users.
+
+### Template Structure
+
+```
+packages/frontend/src/templates/
+├── index.ts              # Template registry and exports
+├── sales-dashboard.ts    # Chart template
+├── user-growth.ts        # Chart template
+├── api-flow.ts           # Mermaid diagram
+├── system-architecture.ts
+├── git-workflow.ts
+├── website-qr.ts
+├── wifi-qr.ts
+├── chart-watermark.ts    # Pipeline template
+└── diagram-webp.ts       # Pipeline template
+```
+
+### Template Schema
+
+```typescript
+interface GalleryTemplate {
+  id: string;              // "sales-dashboard"
+  name: string;            // "Sales Dashboard"
+  description: string;     // "Quarterly revenue bar chart"
+  category: string;        // "Charts" | "Diagrams" | "QR Codes" | "Pipelines"
+  generator: string;       // "quickchart" | "mermaid" | "qr"
+  tags?: string[];
+  workflow: {
+    nodes: StudioNode[];
+    edges: StudioEdge[];
+  };
+}
+```
+
+### URL Parameter Support
+
+Templates can be loaded via URL: `https://studio.floimg.com/?template=sales-dashboard`
+
+This enables "Open in Studio" links from the floimg-web gallery.
+
+## Workflow Metadata
+
+Generated images include workflow metadata in sidecar files.
+
+### File Structure
+
+```
+data/images/
+├── img_12345_abc123.png      # Generated image
+├── img_12345_abc123.meta.json # Workflow metadata
+```
+
+### Metadata Schema
+
+```typescript
+interface ImageMetadata {
+  id: string;
+  filename: string;
+  mime: string;
+  size: number;
+  createdAt: number;
+  workflow?: {
+    nodes: StudioNode[];
+    edges: StudioEdge[];
+    executedAt: number;
+    templateId?: string;  // If loaded from template
+  };
+}
+```
+
+### Gallery Integration
+
+The Gallery tab provides:
+- "Load Workflow" button on hover to reload the workflow that created an image
+- Automatic tab switch to Editor after loading
+
+## TOS Consent
+
+Terms of Service consent is required for cloud deployments only.
+
+### Cloud Detection
+
+Cloud mode is detected by hostname:
+- `studio.floimg.com` → Cloud (TOS required)
+- `floimg.studio` → Cloud (TOS required)
+- Other hostnames → Self-hosted (TOS skipped)
+
+### Consent Storage
+
+Consent is stored in localStorage with version tracking:
+
+```typescript
+{
+  version: "1.0",
+  acceptedAt: "2025-01-01T00:00:00.000Z"
+}
+```
+
+Bumping `TOS_VERSION` in `TOSConsent.tsx` will re-prompt users to accept updated terms.
