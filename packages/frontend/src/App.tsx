@@ -8,7 +8,9 @@ import { Gallery } from "./components/Gallery";
 import { TemplateGallery } from "./components/TemplateGallery";
 import { TOSConsent, useTOSConsent } from "./components/TOSConsent";
 import { AISettings } from "./components/AISettings";
+import { AuthModal } from "./components/AuthModal";
 import { useWorkflowStore } from "./stores/workflowStore";
+import { useAuthStore } from "./stores/authStore";
 import { getTemplateById } from "./templates";
 import type { NodeDefinition } from "@floimg-studio/shared";
 
@@ -19,6 +21,15 @@ function App() {
   const addNode = useWorkflowStore((s) => s.addNode);
   const loadTemplate = useWorkflowStore((s) => s.loadTemplate);
   const { hasConsent, isLoading: tosLoading, grantConsent } = useTOSConsent();
+  const checkAuth = useAuthStore((s) => s.checkAuth);
+  const isCloudMode = useAuthStore((s) => s.isCloudMode);
+
+  // Check auth status on mount (only in cloud mode)
+  useEffect(() => {
+    if (isCloudMode) {
+      checkAuth();
+    }
+  }, [isCloudMode, checkAuth]);
 
   // Handle ?template=<id> URL parameter
   useEffect(() => {
@@ -110,6 +121,9 @@ function App() {
 
       {/* AI Settings Modal */}
       <AISettings />
+
+      {/* Auth Modal - shown when guest needs to sign up */}
+      <AuthModal />
 
       <div className="h-screen flex flex-col bg-gray-100 dark:bg-zinc-900">
         <Toolbar />

@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useWorkflowStore } from "../stores/workflowStore";
 import { useSettingsStore } from "../stores/settingsStore";
+import { useAuthStore, getSignupUrl, getLoginUrl } from "../stores/authStore";
 import { getImageUrl } from "../api/client";
 
 export function Toolbar() {
@@ -9,8 +10,30 @@ export function Toolbar() {
   const exportToYaml = useWorkflowStore((s) => s.exportToYaml);
   const nodes = useWorkflowStore((s) => s.nodes);
   const openSettings = useSettingsStore((s) => s.openSettings);
+
+  // Auth state
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isCloudMode = useAuthStore((s) => s.isCloudMode);
+  const isAuthLoading = useAuthStore((s) => s.isLoading);
+  const logout = useAuthStore((s) => s.logout);
+  const guestUsage = useAuthStore((s) => s.guestUsage);
+
   const [showYaml, setShowYaml] = useState(false);
   const [yamlContent, setYamlContent] = useState("");
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleExecute = async () => {
     await execute();
@@ -24,6 +47,25 @@ export function Toolbar() {
 
   const handleCopyYaml = () => {
     navigator.clipboard.writeText(yamlContent);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    setShowUserMenu(false);
+  };
+
+  // Get user initials for avatar
+  const getInitials = () => {
+    if (!user) return "?";
+    if (user.name) {
+      return user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    return user.email[0].toUpperCase();
   };
 
   return (
@@ -47,6 +89,66 @@ export function Toolbar() {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* User menu (only in cloud mode) */}
+          {isCloudMode && (
+            <div className="relative" ref={userMenuRef}>
+              {isAuthLoading ? (
+                <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-zinc-700 animate-pulse" />
+              ) : isAuthenticated && user ? (
+                <>
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="flex items-center gap-2 p-1 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-700"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-violet-600 text-white flex items-center justify-center text-sm font-medium">
+                      {getInitials()}
+                    </div>
+                  </button>
+
+                  {showUserMenu && (
+                    <div className="absolute right-0 top-full mt-1 w-64 bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-gray-200 dark:border-zinc-700 py-2 z-50">
+                      <div className="px-4 py-2 border-b border-gray-200 dark:border-zinc-700">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {user.name || "User"}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-zinc-400 truncate">
+                          {user.email}
+                        </p>
+                        <p className="text-xs text-violet-600 dark:text-violet-400 mt-1 capitalize">
+                          {user.tier} plan
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700"
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500 dark:text-zinc-400">
+                    {guestUsage.count}/5 today
+                  </span>
+                  <a
+                    href={getLoginUrl()}
+                    className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-zinc-200 hover:text-gray-900 dark:hover:text-white"
+                  >
+                    Sign in
+                  </a>
+                  <a
+                    href={getSignupUrl()}
+                    className="px-3 py-1.5 text-sm font-medium text-white bg-violet-600 rounded-md hover:bg-violet-700"
+                  >
+                    Sign up
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
+
           <button
             onClick={openSettings}
             className="p-2 text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 hover:bg-gray-100 dark:hover:bg-zinc-700 rounded-md"
