@@ -52,18 +52,18 @@ function App() {
 
   return (
     <ReactFlowProvider>
-      <div className="h-screen flex flex-col bg-gray-100">
+      <div className="h-screen flex flex-col bg-gray-100 dark:bg-zinc-900">
         <Toolbar />
 
         {/* Tab navigation */}
-        <div className="bg-white border-b border-gray-200">
+        <div className="bg-white dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700">
           <div className="flex">
             <button
               onClick={() => setActiveTab("editor")}
               className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === "editor"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
+                  ? "border-violet-500 text-violet-600 dark:text-violet-400"
+                  : "border-transparent text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200"
               }`}
             >
               Editor
@@ -72,8 +72,8 @@ function App() {
               onClick={() => setActiveTab("gallery")}
               className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === "gallery"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
+                  ? "border-violet-500 text-violet-600 dark:text-violet-400"
+                  : "border-transparent text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200"
               }`}
             >
               Gallery

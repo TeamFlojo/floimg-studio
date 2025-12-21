@@ -34,7 +34,7 @@ function PreviewToggle({ nodeId, color }: { nodeId: string; color: string }) {
         e.stopPropagation();
         togglePreview(nodeId);
       }}
-      className={`ml-auto p-1 rounded hover:bg-gray-200 transition-colors ${previewVisible ? "opacity-100" : "opacity-40"}`}
+      className={`ml-auto p-1 rounded hover:bg-gray-200 dark:hover:bg-zinc-600 transition-colors ${previewVisible ? "opacity-100" : "opacity-40"}`}
       title={previewVisible ? "Hide preview" : "Show preview"}
     >
       <svg
@@ -78,10 +78,10 @@ export const GeneratorNode = memo(function GeneratorNode({
 
   return (
     <div
-      className={`rounded-lg border-2 bg-white shadow-md min-w-[180px] overflow-hidden ${borderClass}`}
+      className={`rounded-lg border-2 bg-white dark:bg-zinc-800 shadow-md min-w-[180px] overflow-hidden ${borderClass}`}
     >
       {preview && previewVisible && (
-        <div className="bg-gray-100 border-b border-gray-200">
+        <div className="bg-gray-100 dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-700">
           <img
             src={preview}
             alt="Preview"
@@ -92,12 +92,12 @@ export const GeneratorNode = memo(function GeneratorNode({
       <div className="px-4 py-3">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-3 h-3 rounded-full bg-blue-500" />
-          <span className="font-semibold text-sm text-blue-700">
+          <span className="font-semibold text-sm text-blue-700 dark:text-blue-400">
             {data.generatorName}
           </span>
-          <PreviewToggle nodeId={id} color="text-blue-500" />
+          <PreviewToggle nodeId={id} color="text-blue-500 dark:text-blue-400" />
         </div>
-        <div className="text-xs text-gray-500">
+        <div className="text-xs text-gray-500 dark:text-zinc-400">
           {Object.entries(data.params)
             .slice(0, 2)
             .map(([key, value]) => (
@@ -131,7 +131,7 @@ export const TransformNode = memo(function TransformNode({
 
   return (
     <div
-      className={`rounded-lg border-2 bg-white shadow-md min-w-[180px] overflow-hidden ${borderClass}`}
+      className={`rounded-lg border-2 bg-white dark:bg-zinc-800 shadow-md min-w-[180px] overflow-hidden ${borderClass}`}
     >
       <Handle
         type="target"
@@ -139,7 +139,7 @@ export const TransformNode = memo(function TransformNode({
         className="w-3 h-3 !bg-purple-500"
       />
       {preview && previewVisible && (
-        <div className="bg-gray-100 border-b border-gray-200">
+        <div className="bg-gray-100 dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-700">
           <img
             src={preview}
             alt="Preview"
@@ -150,12 +150,12 @@ export const TransformNode = memo(function TransformNode({
       <div className="px-4 py-3">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-3 h-3 rounded-full bg-purple-500" />
-          <span className="font-semibold text-sm text-purple-700">
+          <span className="font-semibold text-sm text-purple-700 dark:text-purple-400">
             {data.operation}
           </span>
-          <PreviewToggle nodeId={id} color="text-purple-500" />
+          <PreviewToggle nodeId={id} color="text-purple-500 dark:text-purple-400" />
         </div>
-        <div className="text-xs text-gray-500">
+        <div className="text-xs text-gray-500 dark:text-zinc-400">
           {Object.entries(data.params)
             .slice(0, 2)
             .map(([key, value]) => (
@@ -187,7 +187,7 @@ export const SaveNode = memo(function SaveNode({
 
   return (
     <div
-      className={`px-4 py-3 rounded-lg border-2 bg-white shadow-md min-w-[180px] ${borderClass}`}
+      className={`px-4 py-3 rounded-lg border-2 bg-white dark:bg-zinc-800 shadow-md min-w-[180px] ${borderClass}`}
     >
       <Handle
         type="target"
@@ -196,9 +196,9 @@ export const SaveNode = memo(function SaveNode({
       />
       <div className="flex items-center gap-2 mb-2">
         <div className="w-3 h-3 rounded-full bg-green-500" />
-        <span className="font-semibold text-sm text-green-700">Save</span>
+        <span className="font-semibold text-sm text-green-700 dark:text-green-400">Save</span>
       </div>
-      <div className="text-xs text-gray-500 truncate">
+      <div className="text-xs text-gray-500 dark:text-zinc-400 truncate">
         {data.destination}
       </div>
     </div>
@@ -271,12 +271,12 @@ export const InputNode = memo(function InputNode({
 
   return (
     <div
-      className={`rounded-lg border-2 bg-white shadow-md min-w-[180px] overflow-hidden ${borderClass}`}
+      className={`rounded-lg border-2 bg-white dark:bg-zinc-800 shadow-md min-w-[180px] overflow-hidden ${borderClass}`}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
     >
       {previewUrl && previewVisible ? (
-        <div className="bg-gray-100 border-b border-gray-200">
+        <div className="bg-gray-100 dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-700">
           <img
             src={previewUrl}
             alt="Uploaded"
@@ -285,10 +285,10 @@ export const InputNode = memo(function InputNode({
         </div>
       ) : !previewUrl ? (
         <div
-          className="bg-amber-50 border-b border-amber-100 h-24 flex items-center justify-center cursor-pointer hover:bg-amber-100 transition-colors"
+          className="bg-amber-50 dark:bg-amber-900/30 border-b border-amber-100 dark:border-amber-800 h-24 flex items-center justify-center cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
           onClick={() => fileInputRef.current?.click()}
         >
-          <div className="text-center text-amber-600">
+          <div className="text-center text-amber-600 dark:text-amber-400">
             <div className="text-2xl mb-1">+</div>
             <div className="text-xs">Drop image or click</div>
           </div>
@@ -304,12 +304,12 @@ export const InputNode = memo(function InputNode({
       <div className="px-4 py-3">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-3 h-3 rounded-full bg-amber-500" />
-          <span className="font-semibold text-sm text-amber-700">
+          <span className="font-semibold text-sm text-amber-700 dark:text-amber-400">
             Input
           </span>
-          <PreviewToggle nodeId={id} color="text-amber-500" />
+          <PreviewToggle nodeId={id} color="text-amber-500 dark:text-amber-400" />
         </div>
-        <div className="text-xs text-gray-500 truncate">
+        <div className="text-xs text-gray-500 dark:text-zinc-400 truncate">
           {data.filename || "No image selected"}
         </div>
       </div>

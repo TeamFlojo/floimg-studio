@@ -102,19 +102,19 @@ export function NodePalette() {
   );
 
   return (
-    <div className="w-64 bg-gray-50 border-r border-gray-200 overflow-y-auto">
+    <div className="w-64 bg-gray-50 dark:bg-zinc-800 border-r border-gray-200 dark:border-zinc-700 overflow-y-auto">
       <div className="p-4">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Nodes</h2>
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Nodes</h2>
 
         {/* Input */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-amber-600 uppercase tracking-wide">
+            <h3 className="text-sm font-medium text-amber-600 dark:text-amber-400 uppercase tracking-wide">
               Input
             </h3>
             <button
               onClick={() => setShowUploads(!showUploads)}
-              className="text-xs text-amber-600 hover:text-amber-700"
+              className="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300"
             >
               {showUploads ? "Hide" : "Browse"} Uploads
             </button>
@@ -123,13 +123,13 @@ export function NodePalette() {
             draggable
             onDragStart={(e) => handleDragStart(e, inputDefinition)}
             onDoubleClick={() => handleDoubleClick(inputDefinition)}
-            className="px-3 py-2 bg-amber-50 border border-amber-200 rounded cursor-grab active:cursor-grabbing hover:bg-amber-100 transition-colors"
+            className="px-3 py-2 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded cursor-grab active:cursor-grabbing hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
           >
-            <div className="text-sm font-medium text-amber-700">Upload Image</div>
-            <div className="text-xs text-gray-500">Start with your image</div>
+            <div className="text-sm font-medium text-amber-700 dark:text-amber-300">Upload Image</div>
+            <div className="text-xs text-gray-500 dark:text-zinc-400">Start with your image</div>
           </div>
           {showUploads && (
-            <div className="mt-2 border border-amber-200 rounded bg-white max-h-64 overflow-y-auto">
+            <div className="mt-2 border border-amber-200 dark:border-amber-700 rounded bg-white dark:bg-zinc-900 max-h-64 overflow-y-auto">
               <UploadGallery />
             </div>
           )}
@@ -137,25 +137,25 @@ export function NodePalette() {
 
         {/* Generators */}
         <div className="mb-6">
-          <h3 className="text-sm font-medium text-blue-600 uppercase tracking-wide mb-2">
+          <h3 className="text-sm font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-2">
             Generators
           </h3>
           {Object.entries(generatorsByCategory).map(([category, nodes]) => (
             <div key={category} className="mb-3">
-              <div className="text-xs text-gray-500 mb-1">{category}</div>
+              <div className="text-xs text-gray-500 dark:text-zinc-400 mb-1">{category}</div>
               {nodes.map((def) => (
                 <div
                   key={def.id}
                   draggable
                   onDragStart={(e) => handleDragStart(e, def)}
                   onDoubleClick={() => handleDoubleClick(def)}
-                  className="px-3 py-2 bg-blue-50 border border-blue-200 rounded mb-1 cursor-grab active:cursor-grabbing hover:bg-blue-100 transition-colors"
+                  className="px-3 py-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded mb-1 cursor-grab active:cursor-grabbing hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
                 >
-                  <div className="text-sm font-medium text-blue-700">
+                  <div className="text-sm font-medium text-blue-700 dark:text-blue-300">
                     {def.label}
                   </div>
                   {def.description && (
-                    <div className="text-xs text-gray-500 truncate">
+                    <div className="text-xs text-gray-500 dark:text-zinc-400 truncate">
                       {def.description}
                     </div>
                   )}
@@ -167,25 +167,25 @@ export function NodePalette() {
 
         {/* Transforms */}
         <div className="mb-6">
-          <h3 className="text-sm font-medium text-purple-600 uppercase tracking-wide mb-2">
+          <h3 className="text-sm font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wide mb-2">
             Transforms
           </h3>
           {Object.entries(transformsByCategory).map(([category, nodes]) => (
             <div key={category} className="mb-3">
-              <div className="text-xs text-gray-500 mb-1">{category}</div>
+              <div className="text-xs text-gray-500 dark:text-zinc-400 mb-1">{category}</div>
               {nodes.map((def) => (
                 <div
                   key={def.id}
                   draggable
                   onDragStart={(e) => handleDragStart(e, def)}
                   onDoubleClick={() => handleDoubleClick(def)}
-                  className="px-3 py-2 bg-purple-50 border border-purple-200 rounded mb-1 cursor-grab active:cursor-grabbing hover:bg-purple-100 transition-colors"
+                  className="px-3 py-2 bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700 rounded mb-1 cursor-grab active:cursor-grabbing hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
                 >
-                  <div className="text-sm font-medium text-purple-700">
+                  <div className="text-sm font-medium text-purple-700 dark:text-purple-300">
                     {def.label}
                   </div>
                   {def.description && (
-                    <div className="text-xs text-gray-500 truncate">
+                    <div className="text-xs text-gray-500 dark:text-zinc-400 truncate">
                       {def.description}
                     </div>
                   )}
@@ -197,17 +197,17 @@ export function NodePalette() {
 
         {/* Output */}
         <div className="mb-6">
-          <h3 className="text-sm font-medium text-green-600 uppercase tracking-wide mb-2">
+          <h3 className="text-sm font-medium text-green-600 dark:text-green-400 uppercase tracking-wide mb-2">
             Output
           </h3>
           <div
             draggable
             onDragStart={(e) => handleDragStart(e, saveDefinition)}
             onDoubleClick={() => handleDoubleClick(saveDefinition)}
-            className="px-3 py-2 bg-green-50 border border-green-200 rounded cursor-grab active:cursor-grabbing hover:bg-green-100 transition-colors"
+            className="px-3 py-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded cursor-grab active:cursor-grabbing hover:bg-green-100 dark:hover:bg-green-900/50 transition-colors"
           >
-            <div className="text-sm font-medium text-green-700">Save</div>
-            <div className="text-xs text-gray-500">Save to file</div>
+            <div className="text-sm font-medium text-green-700 dark:text-green-300">Save</div>
+            <div className="text-xs text-gray-500 dark:text-zinc-400">Save to file</div>
           </div>
         </div>
       </div>

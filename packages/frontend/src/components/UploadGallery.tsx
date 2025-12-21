@@ -47,7 +47,7 @@ export function UploadGallery({ onSelect }: UploadGalleryProps) {
 
   if (loading) {
     return (
-      <div className="p-4 text-center text-gray-500">
+      <div className="p-4 text-center text-gray-500 dark:text-zinc-400">
         Loading uploads...
       </div>
     );
@@ -55,11 +55,11 @@ export function UploadGallery({ onSelect }: UploadGalleryProps) {
 
   if (error) {
     return (
-      <div className="p-4 text-center text-red-500">
+      <div className="p-4 text-center text-red-500 dark:text-red-400">
         {error}
         <button
           onClick={fetchUploads}
-          className="ml-2 text-blue-500 hover:underline"
+          className="ml-2 text-violet-500 dark:text-violet-400 hover:underline"
         >
           Retry
         </button>
@@ -69,7 +69,7 @@ export function UploadGallery({ onSelect }: UploadGalleryProps) {
 
   if (uploads.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
+      <div className="p-4 text-center text-gray-500 dark:text-zinc-400">
         No uploads yet. Drag an image onto an Input node to upload.
       </div>
     );
@@ -81,7 +81,7 @@ export function UploadGallery({ onSelect }: UploadGalleryProps) {
         {uploads.map((upload) => (
           <div
             key={upload.id}
-            className="relative group rounded border border-gray-200 overflow-hidden cursor-pointer hover:border-amber-400 transition-colors"
+            className="relative group rounded border border-gray-200 dark:border-zinc-700 overflow-hidden cursor-pointer hover:border-amber-400 dark:hover:border-amber-500 transition-colors"
             onClick={() => onSelect?.(upload)}
           >
             <img
@@ -97,10 +97,10 @@ export function UploadGallery({ onSelect }: UploadGalleryProps) {
                 Delete
               </button>
             </div>
-            <div className="p-1 text-xs truncate bg-white">
+            <div className="p-1 text-xs truncate bg-white dark:bg-zinc-800 text-gray-800 dark:text-zinc-200">
               {upload.filename}
             </div>
-            <div className="px-1 pb-1 text-xs text-gray-400">
+            <div className="px-1 pb-1 text-xs text-gray-400 dark:text-zinc-500 bg-white dark:bg-zinc-800">
               {formatSize(upload.size)}
             </div>
           </div>

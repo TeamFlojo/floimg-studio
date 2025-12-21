@@ -26,20 +26,20 @@ export function Toolbar() {
 
   return (
     <>
-      <div className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4">
+      <div className="h-14 bg-white dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700 flex items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <div className="flex items-baseline gap-2">
-            <h1 className="text-xl font-bold text-gray-800">floimg Studio</h1>
+            <h1 className="text-xl font-bold text-gray-800 dark:text-white">floimg Studio</h1>
             <a
               href="https://flojo.io"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-gray-400 hover:text-gray-600"
+              className="text-xs text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300"
             >
               by Flojo
             </a>
           </div>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 dark:text-zinc-400">
             {nodes.length} node{nodes.length !== 1 ? "s" : ""}
           </span>
         </div>
@@ -48,7 +48,7 @@ export function Toolbar() {
           <button
             onClick={handleExport}
             disabled={nodes.length === 0}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-zinc-200 bg-white dark:bg-zinc-700 border border-gray-300 dark:border-zinc-600 rounded-md hover:bg-gray-50 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Export YAML
           </button>
@@ -56,7 +56,7 @@ export function Toolbar() {
           <button
             onClick={handleExecute}
             disabled={nodes.length === 0 || execution.status === "running"}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-md hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {execution.status === "running" ? (
               <>
@@ -111,9 +111,9 @@ export function Toolbar() {
 
       {/* Execution result banner */}
       {execution.status === "completed" && execution.imageIds.length > 0 && (
-        <div className="bg-green-50 border-b border-green-200 px-4 py-3">
+        <div className="bg-green-50 dark:bg-green-900/30 border-b border-green-200 dark:border-green-800 px-4 py-3">
           <div className="flex items-center gap-4">
-            <span className="text-green-700 font-medium">
+            <span className="text-green-700 dark:text-green-400 font-medium">
               Generated {execution.imageIds.length} image
               {execution.imageIds.length !== 1 ? "s" : ""}
             </span>
@@ -129,7 +129,7 @@ export function Toolbar() {
                   <img
                     src={getImageUrl(id)}
                     alt="Generated"
-                    className="h-12 w-12 object-cover rounded border border-green-300"
+                    className="h-12 w-12 object-cover rounded border border-green-300 dark:border-green-700"
                   />
                 </a>
               ))}
@@ -139,20 +139,20 @@ export function Toolbar() {
       )}
 
       {execution.status === "error" && (
-        <div className="bg-red-50 border-b border-red-200 px-4 py-3">
-          <span className="text-red-700">Error: {execution.error}</span>
+        <div className="bg-red-50 dark:bg-red-900/30 border-b border-red-200 dark:border-red-800 px-4 py-3">
+          <span className="text-red-700 dark:text-red-400">Error: {execution.error}</span>
         </div>
       )}
 
       {/* YAML export modal */}
       {showYaml && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col">
-            <div className="flex items-center justify-between px-4 py-3 border-b">
-              <h3 className="text-lg font-semibold">Exported Workflow (YAML)</h3>
+          <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-zinc-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Exported Workflow (YAML)</h3>
               <button
                 onClick={() => setShowYaml(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200"
               >
                 <svg
                   className="h-6 w-6"
@@ -170,20 +170,20 @@ export function Toolbar() {
               </button>
             </div>
             <div className="p-4 overflow-auto flex-1">
-              <pre className="bg-gray-100 p-4 rounded text-sm font-mono whitespace-pre-wrap">
+              <pre className="bg-gray-100 dark:bg-zinc-900 p-4 rounded text-sm font-mono whitespace-pre-wrap text-gray-800 dark:text-zinc-200">
                 {yamlContent}
               </pre>
             </div>
-            <div className="flex justify-end gap-2 px-4 py-3 border-t">
+            <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 dark:border-zinc-700">
               <button
                 onClick={handleCopyYaml}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-zinc-200 bg-white dark:bg-zinc-700 border border-gray-300 dark:border-zinc-600 rounded-md hover:bg-gray-50 dark:hover:bg-zinc-600"
               >
                 Copy to Clipboard
               </button>
               <button
                 onClick={() => setShowYaml(false)}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                className="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-md hover:bg-violet-700"
               >
                 Close
               </button>
