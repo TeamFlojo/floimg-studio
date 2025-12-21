@@ -24,6 +24,7 @@ import { mkdir, writeFile } from "fs/promises";
 import { join, dirname } from "path";
 import {
   isModerationEnabled,
+  isStrictModeEnabled,
   moderateImage,
   logModerationIncident,
 } from "../moderation/index.js";
@@ -296,16 +297,43 @@ export async function executeWorkflow(
             if (result) {
               // SCAN BEFORE SAVE: Moderate image before writing to disk
               if (isModerationEnabled()) {
-                const moderationResult = await moderateImage(result.bytes, result.mime);
-                if (moderationResult.flagged) {
-                  logModerationIncident("generated", moderationResult, {
-                    nodeId: node.id,
-                    nodeType: node.type,
-                  });
-                  throw new Error(
-                    `Content policy violation: Image flagged for ${moderationResult.flaggedCategories.join(", ")}. ` +
-                    `This content cannot be saved.`
-                  );
+                try {
+                  const moderationResult = await moderateImage(result.bytes, result.mime);
+                  if (moderationResult.flagged) {
+                    await logModerationIncident("generated", moderationResult, {
+                      nodeId: node.id,
+                      nodeType: node.type,
+                    });
+                    throw new Error(
+                      `Content policy violation: Image flagged for ${moderationResult.flaggedCategories.join(", ")}. ` +
+                      `This content cannot be saved.`
+                    );
+                  }
+                } catch (moderationError) {
+                  // Check if it's a policy violation (our own error) vs API error
+                  if (moderationError instanceof Error &&
+                      moderationError.message.includes("Content policy violation")) {
+                    throw moderationError;
+                  }
+                  // API/service error
+                  console.error("Moderation check failed:", moderationError);
+                  if (isStrictModeEnabled()) {
+                    await logModerationIncident("error", {
+                      safe: false,
+                      flagged: true,
+                      categories: {} as never,
+                      categoryScores: {},
+                      flaggedCategories: ["moderation_service_error"],
+                    }, {
+                      nodeId: node.id,
+                      nodeType: node.type,
+                      error: String(moderationError),
+                    });
+                    throw new Error(
+                      "Content moderation service unavailable. Generation blocked for safety."
+                    );
+                  }
+                  console.warn("Moderation failed but strict mode is OFF - allowing generation");
                 }
               }
 

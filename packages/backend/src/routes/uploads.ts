@@ -4,6 +4,7 @@ import { join, extname } from "path";
 import { nanoid } from "nanoid";
 import {
   isModerationEnabled,
+  isStrictModeEnabled,
   moderateImage,
   logModerationIncident,
 } from "../moderation/index.js";
@@ -118,7 +119,7 @@ export async function uploadsRoutes(fastify: FastifyInstance) {
       try {
         const moderationResult = await moderateImage(buffer, mime);
         if (moderationResult.flagged) {
-          logModerationIncident("uploaded", moderationResult, {
+          await logModerationIncident("uploaded", moderationResult, {
             originalFilename: data.filename,
             mime,
             size: buffer.length,
@@ -129,8 +130,27 @@ export async function uploadsRoutes(fastify: FastifyInstance) {
           };
         }
       } catch (moderationError) {
-        // Log but don't block if moderation service fails
         console.error("Moderation check failed:", moderationError);
+        // In strict mode, block content when moderation fails
+        if (isStrictModeEnabled()) {
+          await logModerationIncident("error", {
+            safe: false,
+            flagged: true,
+            categories: {} as never,
+            categoryScores: {},
+            flaggedCategories: ["moderation_service_error"],
+          }, {
+            originalFilename: data.filename,
+            mime,
+            error: String(moderationError),
+          });
+          reply.code(503);
+          return {
+            error: "Content moderation service unavailable. Upload blocked for safety.",
+          };
+        }
+        // In permissive mode, allow through with warning
+        console.warn("Moderation failed but strict mode is OFF - allowing upload");
       }
     }
 

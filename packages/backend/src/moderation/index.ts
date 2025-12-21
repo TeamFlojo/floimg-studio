@@ -8,10 +8,13 @@
 export {
   initModeration,
   isModerationEnabled,
+  isStrictModeEnabled,
+  isCloudMode,
   moderateText,
   moderateImage,
   moderateContent,
   logModerationIncident,
+  getRecentIncidents,
   type ModerationResult,
   type ModerationOptions,
 } from "./moderator.js";

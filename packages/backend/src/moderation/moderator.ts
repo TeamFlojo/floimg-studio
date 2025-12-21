@@ -3,9 +3,16 @@
  *
  * Uses OpenAI's Moderation API to scan content before it's saved to disk.
  * SCAN BEFORE SAVE - Nothing touches disk without passing moderation.
+ *
+ * Configuration:
+ * - OPENAI_API_KEY: Required for moderation to work
+ * - MODERATION_STRICT_MODE: If "true", block content when moderation fails (default: true for cloud)
+ * - FLOIMG_CLOUD: If "true", indicates cloud deployment (stricter policies)
  */
 
 import OpenAI from "openai";
+import { mkdir, appendFile } from "fs/promises";
+import { join } from "path";
 
 export interface ModerationResult {
   safe: boolean;
@@ -35,6 +42,12 @@ export interface ModerationOptions {
 // Singleton OpenAI client
 let openaiClient: OpenAI | null = null;
 
+// Configuration
+let strictMode = true;
+let isCloud = false;
+const INCIDENT_LOG_DIR = "./data/moderation";
+const INCIDENT_LOG_FILE = "incidents.jsonl";
+
 /**
  * Initialize the moderation service
  * Call this on server startup
@@ -42,14 +55,31 @@ let openaiClient: OpenAI | null = null;
 export function initModeration(): boolean {
   const apiKey = process.env.OPENAI_API_KEY;
 
+  // Check if we're running in cloud mode
+  isCloud = process.env.FLOIMG_CLOUD === "true";
+
+  // Strict mode: block content if moderation fails
+  // Default: true for cloud, configurable via env var
+  const strictEnv = process.env.MODERATION_STRICT_MODE;
+  if (strictEnv !== undefined) {
+    strictMode = strictEnv === "true";
+  } else {
+    strictMode = isCloud; // Cloud defaults to strict
+  }
+
   if (!apiKey) {
     console.warn("[Moderation] OPENAI_API_KEY not set. Content moderation is DISABLED.");
     console.warn("[Moderation] Set OPENAI_API_KEY to enable automatic content scanning.");
+    if (isCloud) {
+      console.error("[Moderation] WARNING: Cloud mode without moderation is dangerous!");
+    }
     return false;
   }
 
   openaiClient = new OpenAI({ apiKey });
   console.log("[Moderation] Content moderation enabled with OpenAI Moderation API");
+  console.log(`[Moderation] Strict mode: ${strictMode ? "ON" : "OFF"} (block on API failures)`);
+  console.log(`[Moderation] Cloud mode: ${isCloud ? "YES" : "NO"}`);
   return true;
 }
 
@@ -58,6 +88,20 @@ export function initModeration(): boolean {
  */
 export function isModerationEnabled(): boolean {
   return openaiClient !== null;
+}
+
+/**
+ * Check if strict mode is enabled (block on moderation failures)
+ */
+export function isStrictModeEnabled(): boolean {
+  return strictMode;
+}
+
+/**
+ * Check if running in cloud mode
+ */
+export function isCloudMode(): boolean {
+  return isCloud;
 }
 
 /**
@@ -277,12 +321,13 @@ function combineResults(results: ModerationResult[]): ModerationResult {
 
 /**
  * Log a moderation incident for admin review
+ * Writes to both console and a persistent log file
  */
-export function logModerationIncident(
-  type: "generated" | "uploaded",
+export async function logModerationIncident(
+  type: "generated" | "uploaded" | "error",
   result: ModerationResult,
   context?: Record<string, unknown>
-): void {
+): Promise<void> {
   const incident = {
     timestamp: new Date().toISOString(),
     type,
@@ -292,7 +337,32 @@ export function logModerationIncident(
     context,
   };
 
-  // For now, just log to console
-  // In production, this would go to a database or logging service
-  console.warn("[Moderation] Content flagged:", JSON.stringify(incident, null, 2));
+  // Log to console
+  console.warn("[Moderation] Incident:", JSON.stringify(incident));
+
+  // Persist to log file (JSONL format - one JSON object per line)
+  try {
+    await mkdir(INCIDENT_LOG_DIR, { recursive: true });
+    const logPath = join(INCIDENT_LOG_DIR, INCIDENT_LOG_FILE);
+    await appendFile(logPath, JSON.stringify(incident) + "\n");
+  } catch (error) {
+    console.error("[Moderation] Failed to write incident log:", error);
+  }
+}
+
+/**
+ * Get recent moderation incidents (for admin dashboard)
+ */
+export async function getRecentIncidents(limit: number = 100): Promise<unknown[]> {
+  try {
+    const { readFile } = await import("fs/promises");
+    const logPath = join(INCIDENT_LOG_DIR, INCIDENT_LOG_FILE);
+    const content = await readFile(logPath, "utf-8");
+    const lines = content.trim().split("\n").filter(Boolean);
+    const incidents = lines.map((line) => JSON.parse(line));
+    // Return most recent first
+    return incidents.reverse().slice(0, limit);
+  } catch {
+    return [];
+  }
 }
