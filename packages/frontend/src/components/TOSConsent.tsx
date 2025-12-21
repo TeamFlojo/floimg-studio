@@ -37,40 +37,9 @@ export function TOSConsent({ onAccept }: TOSConsentProps) {
             Welcome to floimg Studio
           </h2>
 
-          <div className="text-sm text-gray-600 dark:text-zinc-300 space-y-4 mb-6">
-            <p>
-              Before you get started, please review our content policy. floimg
-              Studio is a powerful image generation tool, and we want to ensure
-              it's used responsibly.
-            </p>
-
-            <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4">
-              <h3 className="font-medium text-amber-800 dark:text-amber-200 mb-2">
-                Content Policy Summary
-              </h3>
-              <ul className="text-amber-700 dark:text-amber-300 text-sm space-y-1">
-                <li>
-                  - No illegal content (especially CSAM - this is a criminal
-                  offense)
-                </li>
-                <li>- No sexually explicit or pornographic content</li>
-                <li>- No violent, graphic, or gory content</li>
-                <li>- No hate speech, harassment, or discrimination</li>
-                <li>- No malware, phishing links, or harmful QR codes</li>
-              </ul>
-            </div>
-
-            <p>
-              All generated content is automatically scanned by our moderation
-              system. Violations may result in content being blocked.
-            </p>
-
-            <p className="text-xs text-gray-500 dark:text-zinc-400">
-              Self-hosted users: You are responsible for content created on your
-              own infrastructure, but our software must never be used to create
-              illegal content.
-            </p>
-          </div>
+          <p className="text-sm text-gray-600 dark:text-zinc-300 mb-6">
+            A powerful visual workflow builder for image processing.
+          </p>
 
           <label className="flex items-start gap-3 mb-6 cursor-pointer">
             <input
@@ -80,7 +49,7 @@ export function TOSConsent({ onAccept }: TOSConsentProps) {
               className="mt-1 w-4 h-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500"
             />
             <span className="text-sm text-gray-700 dark:text-zinc-300">
-              I have read and agree to the{" "}
+              I agree to the{" "}
               <a
                 href="https://floimg.com/terms"
                 target="_blank"
@@ -89,8 +58,15 @@ export function TOSConsent({ onAccept }: TOSConsentProps) {
               >
                 Terms of Service
               </a>{" "}
-              and Content Policy. I understand that violations may result in my
-              content being blocked.
+              and{" "}
+              <a
+                href="https://floimg.com/content-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-violet-600 dark:text-violet-400 hover:underline"
+              >
+                Content Policy
+              </a>
             </span>
           </label>
 
