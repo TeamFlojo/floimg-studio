@@ -1,12 +1,49 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { listImages, getImageUrl, type ImageInfo } from "../api/client";
+import { listImages, getImageUrl, getImageWorkflow, type ImageInfo } from "../api/client";
+import { useWorkflowStore } from "../stores/workflowStore";
+import type { GalleryTemplate } from "@floimg-studio/shared";
 
 export function Gallery() {
+  const loadTemplate = useWorkflowStore((s) => s.loadTemplate);
+  const [loadingWorkflow, setLoadingWorkflow] = useState<string | null>(null);
+
   const { data: images, isLoading, error, refetch } = useQuery({
     queryKey: ["images"],
     queryFn: listImages,
     refetchInterval: 5000, // Auto-refresh every 5 seconds
   });
+
+  const handleLoadWorkflow = async (imageId: string) => {
+    setLoadingWorkflow(imageId);
+    try {
+      const metadata = await getImageWorkflow(imageId);
+      if (metadata?.workflow) {
+        // Convert to GalleryTemplate format
+        const template: GalleryTemplate = {
+          id: `image-${imageId}`,
+          name: `Workflow from ${imageId}`,
+          description: "Loaded from gallery image",
+          category: "Gallery",
+          generator: "unknown",
+          workflow: {
+            nodes: metadata.workflow.nodes,
+            edges: metadata.workflow.edges,
+          },
+        };
+        loadTemplate(template);
+        // Navigate to editor tab (parent handles this via URL or state)
+        window.dispatchEvent(new CustomEvent("workflow-loaded"));
+      } else {
+        alert("No workflow metadata available for this image");
+      }
+    } catch (err) {
+      console.error("Failed to load workflow:", err);
+      alert("Failed to load workflow");
+    } finally {
+      setLoadingWorkflow(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -49,14 +86,25 @@ export function Gallery() {
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {images.map((image) => (
-          <ImageCard key={image.id} image={image} />
+          <ImageCard
+            key={image.id}
+            image={image}
+            onLoadWorkflow={() => handleLoadWorkflow(image.id)}
+            isLoading={loadingWorkflow === image.id}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-function ImageCard({ image }: { image: ImageInfo }) {
+interface ImageCardProps {
+  image: ImageInfo;
+  onLoadWorkflow: () => void;
+  isLoading: boolean;
+}
+
+function ImageCard({ image, onLoadWorkflow, isLoading }: ImageCardProps) {
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleString();
   };
@@ -68,20 +116,35 @@ function ImageCard({ image }: { image: ImageInfo }) {
   };
 
   return (
-    <div className="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-      <a
-        href={getImageUrl(image.id)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block aspect-square bg-gray-100 dark:bg-zinc-900"
-      >
-        <img
-          src={getImageUrl(image.id)}
-          alt={image.filename}
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
-      </a>
+    <div className="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+      <div className="relative">
+        <a
+          href={getImageUrl(image.id)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block aspect-square bg-gray-100 dark:bg-zinc-900"
+        >
+          <img
+            src={getImageUrl(image.id)}
+            alt={image.filename}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        </a>
+        {/* Hover overlay with Load Workflow button */}
+        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              onLoadWorkflow();
+            }}
+            disabled={isLoading}
+            className="px-3 py-1.5 bg-violet-600 text-white text-sm rounded-lg hover:bg-violet-700 disabled:opacity-50"
+          >
+            {isLoading ? "Loading..." : "Load Workflow"}
+          </button>
+        </div>
+      </div>
       <div className="p-3">
         <div className="text-sm font-medium text-gray-800 dark:text-white truncate">
           {image.filename}

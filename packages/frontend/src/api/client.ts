@@ -2,6 +2,7 @@ import type {
   NodeDefinition,
   StudioNode,
   StudioEdge,
+  ImageMetadata,
 } from "@floimg-studio/shared";
 
 const API_BASE = "/api";
@@ -77,6 +78,14 @@ export async function listImages(): Promise<ImageInfo[]> {
 
 export function getImageUrl(id: string): string {
   return `${API_BASE}/images/${id}/blob`;
+}
+
+export async function getImageWorkflow(id: string): Promise<ImageMetadata | null> {
+  try {
+    return await fetchJson(`${API_BASE}/images/${id}/workflow`);
+  } catch {
+    return null; // Workflow metadata not available for this image
+  }
 }
 
 // Uploads

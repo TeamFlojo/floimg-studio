@@ -34,6 +34,17 @@ function App() {
     }
   }, [loadTemplate]);
 
+  // Listen for workflow-loaded event (from Gallery)
+  useEffect(() => {
+    const handleWorkflowLoaded = () => {
+      setActiveTab("editor");
+    };
+    window.addEventListener("workflow-loaded", handleWorkflowLoaded);
+    return () => {
+      window.removeEventListener("workflow-loaded", handleWorkflowLoaded);
+    };
+  }, []);
+
   // Handler for template selection (from TemplateGallery)
   const handleTemplateSelect = useCallback(
     (templateId: string) => {
