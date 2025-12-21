@@ -198,17 +198,17 @@ importers:
         specifier: workspace:*
         version: link:../shared
       '@teamflojo/floimg':
-        specifier: ^0.1.0
-        version: 0.1.0(ws@8.18.3)(zod@3.25.76)
+        specifier: ^0.2.0
+        version: 0.2.0(ws@8.18.3)(zod@3.25.76)
       '@teamflojo/floimg-mermaid':
-        specifier: ^0.1.0
-        version: 0.1.0(@babel/core@7.28.5)(@babel/template@7.27.2)(@teamflojo/floimg@0.1.0(ws@8.18.3)(zod@3.25.76))(@types/react@18.3.27)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+        specifier: ^0.2.0
+        version: 0.2.0(@babel/core@7.28.5)(@babel/template@7.27.2)(@teamflojo/floimg@0.2.0(ws@8.18.3)(zod@3.25.76))(@types/react@18.3.27)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
       '@teamflojo/floimg-qr':
-        specifier: ^0.1.0
-        version: 0.1.0(@teamflojo/floimg@0.1.0(ws@8.18.3)(zod@3.25.76))
+        specifier: ^0.2.0
+        version: 0.2.0(@teamflojo/floimg@0.2.0(ws@8.18.3)(zod@3.25.76))
       '@teamflojo/floimg-quickchart':
-        specifier: ^0.1.0
-        version: 0.1.0(@teamflojo/floimg@0.1.0(ws@8.18.3)(zod@3.25.76))
+        specifier: ^0.2.0
+        version: 0.2.0(@teamflojo/floimg@0.2.0(ws@8.18.3)(zod@3.25.76))
       fastify:
         specifier: ^5.6.2
         version: 5.6.2
@@ -1720,26 +1720,26 @@ packages:
   '@tanstack/virtual-core@3.13.13':
     resolution: {integrity: sha512-uQFoSdKKf5S8k51W5t7b2qpfkyIbdHMzAn+AMQvHPxKUPeo1SsGaA4JRISQT87jm28b7z8OEqPcg1IOZagQHcA==}
 
-  '@teamflojo/floimg-mermaid@0.1.0':
-    resolution: {integrity: sha512-CNcjQUnsgq/veiIG+O8fPEEsmOhbmTuGYZ7WvCZT9PhP+qdN3hu0Vpe9ZrVcZvn7BHoxHEcIdHjrQ/mUgIW4Fw==}
+  '@teamflojo/floimg-mermaid@0.2.0':
+    resolution: {integrity: sha512-57NI7wdQC2dbVMe5zH/qpj5TMpdjRF6rG5nsT50qGpPxDO3kK8KccDMa0z/AAc5wq9yAysNkmd8svzf0tAkcvQ==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       '@teamflojo/floimg': ^0.1.0
 
-  '@teamflojo/floimg-qr@0.1.0':
-    resolution: {integrity: sha512-2+NPui8D7QMnxSIKKr1hE/b5ZV+QUwFBt17KUZblLTLJO5ppRB2RHRJI5s0+i8qxUWqTWmzvC7e2bYWTMgIRIA==}
+  '@teamflojo/floimg-qr@0.2.0':
+    resolution: {integrity: sha512-YRLHuvfq3iJgy1Rcjyna+HUFkcXK9aw/su+C9fqMRi0pfHcBBGvqLp1qgKd1vG3in6EwNcMdO953wVMLpMsUvg==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       '@teamflojo/floimg': ^0.1.0
 
-  '@teamflojo/floimg-quickchart@0.1.0':
-    resolution: {integrity: sha512-02haoLt39rUlQ//ikivNBHuynB4IduyvOxPJ/bj0poLKnmmc8oIU1kaxV2bikZLbMlMOQT+9nHlU3ZQjaf5zfA==}
+  '@teamflojo/floimg-quickchart@0.2.0':
+    resolution: {integrity: sha512-ZWIJA9PvJLwqXb2czN4luSiODPT4QMl1ef3LAEmXGNm1Mz9LUtPQ1/vgpiYpKgOumYUyJ2k9nGKvKOOHaK3s/Q==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       '@teamflojo/floimg': ^0.1.0
 
-  '@teamflojo/floimg@0.1.0':
-    resolution: {integrity: sha512-FUFEoGOEmG8tYTmrpNarBexC0F0/ywld2efAUVihpGWUx88UZ4V1jpyXE14UfQ8Rl2ODQ8dN+HA5ipCXxqX76A==}
+  '@teamflojo/floimg@0.2.0':
+    resolution: {integrity: sha512-cImaAL/2qXW2Rz0JSe6a+LqqbnQub28lfZttphfq8DF2dmT6/3WULgojbofGrhZ5Xz2oLA//55y3j/3l2xl6cA==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -5968,10 +5968,10 @@ snapshots:
 
   '@tanstack/virtual-core@3.13.13': {}
 
-  '@teamflojo/floimg-mermaid@0.1.0(@babel/core@7.28.5)(@babel/template@7.27.2)(@teamflojo/floimg@0.1.0(ws@8.18.3)(zod@3.25.76))(@types/react@18.3.27)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)':
+  '@teamflojo/floimg-mermaid@0.2.0(@babel/core@7.28.5)(@babel/template@7.27.2)(@teamflojo/floimg@0.2.0(ws@8.18.3)(zod@3.25.76))(@types/react@18.3.27)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)':
     dependencies:
       '@mermaid-js/mermaid-cli': 11.12.0(@babel/core@7.28.5)(@babel/template@7.27.2)(@types/react@18.3.27)(puppeteer@23.11.1(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
-      '@teamflojo/floimg': 0.1.0(ws@8.18.3)(zod@3.25.76)
+      '@teamflojo/floimg': 0.2.0(ws@8.18.3)(zod@3.25.76)
       puppeteer: 23.11.1(typescript@5.9.3)
     transitivePeerDependencies:
       - '@babel/core'
@@ -5987,16 +5987,16 @@ snapshots:
       - utf-8-validate
       - yaml
 
-  '@teamflojo/floimg-qr@0.1.0(@teamflojo/floimg@0.1.0(ws@8.18.3)(zod@3.25.76))':
+  '@teamflojo/floimg-qr@0.2.0(@teamflojo/floimg@0.2.0(ws@8.18.3)(zod@3.25.76))':
     dependencies:
-      '@teamflojo/floimg': 0.1.0(ws@8.18.3)(zod@3.25.76)
+      '@teamflojo/floimg': 0.2.0(ws@8.18.3)(zod@3.25.76)
       qrcode: 1.5.4
 
-  '@teamflojo/floimg-quickchart@0.1.0(@teamflojo/floimg@0.1.0(ws@8.18.3)(zod@3.25.76))':
+  '@teamflojo/floimg-quickchart@0.2.0(@teamflojo/floimg@0.2.0(ws@8.18.3)(zod@3.25.76))':
     dependencies:
-      '@teamflojo/floimg': 0.1.0(ws@8.18.3)(zod@3.25.76)
+      '@teamflojo/floimg': 0.2.0(ws@8.18.3)(zod@3.25.76)
 
-  '@teamflojo/floimg@0.1.0(ws@8.18.3)(zod@3.25.76)':
+  '@teamflojo/floimg@0.2.0(ws@8.18.3)(zod@3.25.76)':
     dependencies:
       '@aws-sdk/client-s3': 3.946.0
       '@modelcontextprotocol/sdk': 1.24.3(zod@3.25.76)
