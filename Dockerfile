@@ -15,8 +15,8 @@ COPY packages/shared/package.json ./packages/shared/
 COPY packages/backend/package.json ./packages/backend/
 COPY packages/frontend/package.json ./packages/frontend/
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install dependencies (--ignore-scripts skips prepare/husky)
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Copy source code
 COPY packages/shared ./packages/shared
@@ -45,8 +45,8 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/backend/package.json ./packages/backend/
 
-# Install production dependencies only
-RUN pnpm install --frozen-lockfile --prod
+# Install production dependencies only (--ignore-scripts skips prepare/husky)
+RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 
 # Copy built backend and shared
 COPY --from=builder /app/packages/backend/dist ./packages/backend/dist
