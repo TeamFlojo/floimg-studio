@@ -3,6 +3,14 @@ import { useState, useEffect } from "react";
 const TOS_CONSENT_KEY = "floimg-tos-consent";
 const TOS_VERSION = "1.0"; // Bump this to re-prompt for new TOS versions
 
+// Cloud deployment detection - TOS consent only required for cloud
+const CLOUD_HOSTNAMES = ["studio.floimg.com", "floimg.studio"];
+
+function isCloudDeployment(): boolean {
+  if (typeof window === "undefined") return false;
+  return CLOUD_HOSTNAMES.includes(window.location.hostname);
+}
+
 interface TOSConsentProps {
   onAccept: () => void;
 }
@@ -109,12 +117,21 @@ export function TOSConsent({ onAccept }: TOSConsentProps) {
 export function useTOSConsent(): {
   hasConsent: boolean;
   isLoading: boolean;
+  isCloud: boolean;
   grantConsent: () => void;
 } {
   const [hasConsent, setHasConsent] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const isCloud = isCloudDeployment();
 
   useEffect(() => {
+    // Self-hosted users don't need TOS consent - they're responsible for their own content
+    if (!isCloud) {
+      setHasConsent(true);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const stored = localStorage.getItem(TOS_CONSENT_KEY);
       if (stored) {
@@ -128,11 +145,11 @@ export function useTOSConsent(): {
       // Invalid stored data
     }
     setIsLoading(false);
-  }, []);
+  }, [isCloud]);
 
   const grantConsent = () => {
     setHasConsent(true);
   };
 
-  return { hasConsent, isLoading, grantConsent };
+  return { hasConsent, isLoading, isCloud, grantConsent };
 }

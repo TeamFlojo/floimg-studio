@@ -61,11 +61,6 @@ export const salesDashboard: GalleryTemplate = {
     ],
     edges: [],
   },
-  preview: {
-    imageUrl: "/templates/sales-dashboard.png",
-    width: 600,
-    height: 400,
-  },
 };
 
 export const userGrowth: GalleryTemplate = {
@@ -116,11 +111,6 @@ export const userGrowth: GalleryTemplate = {
     ],
     edges: [],
   },
-  preview: {
-    imageUrl: "/templates/user-growth.png",
-    width: 600,
-    height: 400,
-  },
 };
 
 // ============================================
@@ -168,11 +158,6 @@ export const apiFlowDiagram: GalleryTemplate = {
       },
     ],
     edges: [],
-  },
-  preview: {
-    imageUrl: "/templates/api-flow.png",
-    width: 800,
-    height: 600,
   },
 };
 
@@ -234,11 +219,6 @@ export const systemArchitecture: GalleryTemplate = {
     ],
     edges: [],
   },
-  preview: {
-    imageUrl: "/templates/system-architecture.png",
-    width: 800,
-    height: 700,
-  },
 };
 
 export const gitWorkflow: GalleryTemplate = {
@@ -284,11 +264,6 @@ export const gitWorkflow: GalleryTemplate = {
     ],
     edges: [],
   },
-  preview: {
-    imageUrl: "/templates/git-workflow.png",
-    width: 700,
-    height: 400,
-  },
 };
 
 // ============================================
@@ -323,11 +298,6 @@ export const websiteQR: GalleryTemplate = {
     ],
     edges: [],
   },
-  preview: {
-    imageUrl: "/templates/website-qr.png",
-    width: 400,
-    height: 400,
-  },
 };
 
 export const wifiQR: GalleryTemplate = {
@@ -357,11 +327,6 @@ export const wifiQR: GalleryTemplate = {
       },
     ],
     edges: [],
-  },
-  preview: {
-    imageUrl: "/templates/wifi-qr.png",
-    width: 400,
-    height: 400,
   },
 };
 
@@ -435,11 +400,6 @@ export const chartWithWatermark: GalleryTemplate = {
       { id: "e2", source: "transform-1", target: "transform-2" },
     ],
   },
-  preview: {
-    imageUrl: "/templates/chart-watermark.png",
-    width: 600,
-    height: 400,
-  },
 };
 
 export const diagramToWebP: GalleryTemplate = {
@@ -482,11 +442,6 @@ export const diagramToWebP: GalleryTemplate = {
       },
     ],
     edges: [{ id: "e1", source: "gen-1", target: "transform-1" }],
-  },
-  preview: {
-    imageUrl: "/templates/diagram-webp.png",
-    width: 500,
-    height: 300,
   },
 };
 
