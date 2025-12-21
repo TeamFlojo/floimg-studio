@@ -15,7 +15,7 @@
     "lint:fix": "eslint packages/*/src --ext .ts,.tsx --fix",
     "format": "prettier --write \"packages/*/src/**/*.{ts,tsx,json,css}\"",
     "format:check": "prettier --check \"packages/*/src/**/*.{ts,tsx,json,css}\"",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
