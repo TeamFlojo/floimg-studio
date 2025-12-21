@@ -4,9 +4,20 @@ import { executeWorkflow, toPipeline } from "../floimg/executor.js";
 import { stringify as yamlStringify } from "yaml";
 import { nanoid } from "nanoid";
 
+// AI provider configuration from frontend
+interface AIProviderConfig {
+  openai?: { apiKey: string };
+  anthropic?: { apiKey: string };
+  gemini?: { apiKey: string };
+  openrouter?: { apiKey: string };
+  ollama?: { baseUrl: string };
+  lmstudio?: { baseUrl: string };
+}
+
 interface ExecuteBody {
   nodes: StudioNode[];
   edges: StudioEdge[];
+  aiProviders?: AIProviderConfig;
 }
 
 // In-memory store for execution results (for PoC)
@@ -68,7 +79,7 @@ export async function executeRoutes(fastify: FastifyInstance) {
   fastify.post<{ Body: ExecuteBody }>(
     "/execute/sync",
     async (request, reply) => {
-      const { nodes, edges } = request.body;
+      const { nodes, edges, aiProviders } = request.body;
 
       if (!nodes || !Array.isArray(nodes) || nodes.length === 0) {
         reply.code(400);
@@ -76,7 +87,7 @@ export async function executeRoutes(fastify: FastifyInstance) {
       }
 
       try {
-        const result = await executeWorkflow(nodes, edges);
+        const result = await executeWorkflow(nodes, edges, { aiProviders });
 
         // Build previews map: nodeId -> base64 data URL
         const previews: Record<string, string> = {};
@@ -93,10 +104,21 @@ export async function executeRoutes(fastify: FastifyInstance) {
           }
         }
 
+        // Build dataOutputs map: nodeId -> { dataType, content, parsed }
+        const dataOutputs: Record<string, { dataType: "text" | "json"; content: string; parsed?: Record<string, unknown> }> = {};
+        for (const [nodeId, output] of result.dataOutputs) {
+          dataOutputs[nodeId] = {
+            dataType: output.dataType,
+            content: output.content,
+            parsed: output.parsed,
+          };
+        }
+
         return {
           status: "completed",
           imageIds: result.imageIds,
           previews,
+          dataOutputs,
         };
       } catch (error) {
         reply.code(500);

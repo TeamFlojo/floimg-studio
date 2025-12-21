@@ -7,6 +7,7 @@ import { Toolbar } from "./components/Toolbar";
 import { Gallery } from "./components/Gallery";
 import { TemplateGallery } from "./components/TemplateGallery";
 import { TOSConsent, useTOSConsent } from "./components/TOSConsent";
+import { AISettings } from "./components/AISettings";
 import { useWorkflowStore } from "./stores/workflowStore";
 import { getTemplateById } from "./templates";
 import type { NodeDefinition } from "@floimg-studio/shared";
@@ -106,6 +107,9 @@ function App() {
     <ReactFlowProvider>
       {/* TOS Consent Modal - shown on first use */}
       {!hasConsent && <TOSConsent onAccept={grantConsent} />}
+
+      {/* AI Settings Modal */}
+      <AISettings />
 
       <div className="h-screen flex flex-col bg-gray-100 dark:bg-zinc-900">
         <Toolbar />

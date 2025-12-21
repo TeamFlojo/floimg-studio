@@ -36,19 +36,31 @@ export async function getTransforms(): Promise<NodeDefinition[]> {
   return fetchJson(`${API_BASE}/nodes/transforms`);
 }
 
+// AI provider configuration passed to backend
+export interface AIProviderConfig {
+  openai?: { apiKey: string };
+  anthropic?: { apiKey: string };
+  gemini?: { apiKey: string };
+  openrouter?: { apiKey: string };
+  ollama?: { baseUrl: string };
+  lmstudio?: { baseUrl: string };
+}
+
 // Execution
 export async function executeWorkflow(
   nodes: StudioNode[],
-  edges: StudioEdge[]
+  edges: StudioEdge[],
+  aiProviders?: AIProviderConfig
 ): Promise<{
   status: string;
   imageIds: string[];
   previews?: Record<string, string>;
+  dataOutputs?: Record<string, { dataType: "text" | "json"; content: string; parsed?: Record<string, unknown> }>;
   error?: string;
 }> {
   return fetchJson(`${API_BASE}/execute/sync`, {
     method: "POST",
-    body: JSON.stringify({ nodes, edges }),
+    body: JSON.stringify({ nodes, edges, aiProviders }),
   });
 }
 

@@ -5,19 +5,29 @@ import type {
   TransformNodeData,
   SaveNodeData,
   InputNodeData,
+  VisionNodeData,
+  TextNodeData,
   NodeDefinition,
   GalleryTemplate,
 } from "@floimg-studio/shared";
 import { executeWorkflow, exportYaml } from "../api/client";
+import { useSettingsStore } from "./settingsStore";
 
-type NodeData = GeneratorNodeData | TransformNodeData | SaveNodeData | InputNodeData;
+type NodeData = GeneratorNodeData | TransformNodeData | SaveNodeData | InputNodeData | VisionNodeData | TextNodeData;
 
 type NodeExecutionStatus = "idle" | "running" | "completed" | "error";
+
+interface DataOutput {
+  dataType: "text" | "json";
+  content: string;
+  parsed?: Record<string, unknown>;
+}
 
 interface ExecutionState {
   status: "idle" | "running" | "completed" | "error";
   imageIds: string[];
   previews: Record<string, string>; // nodeId -> data URL
+  dataOutputs: Record<string, DataOutput>; // nodeId -> text/json output (for vision/text nodes)
   nodeStatus: Record<string, NodeExecutionStatus>; // per-node execution status
   error?: string;
 }
@@ -84,6 +94,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     status: "idle",
     imageIds: [],
     previews: {},
+    dataOutputs: {},
     nodeStatus: {},
   },
 
@@ -125,6 +136,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
         status: "idle",
         imageIds: [],
         previews: {},
+        dataOutputs: {},
         nodeStatus: {},
       },
     });
@@ -141,6 +153,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
         status: "idle",
         imageIds: [],
         previews: {},
+        dataOutputs: {},
         nodeStatus: {},
       },
     });
@@ -178,6 +191,16 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
         filename: undefined,
         mime: undefined,
       } as InputNodeData;
+    } else if (definition.type === "vision") {
+      data = {
+        providerName: definition.name,
+        params: getDefaultParams(definition),
+      } as VisionNodeData;
+    } else if (definition.type === "text") {
+      data = {
+        providerName: definition.name,
+        params: getDefaultParams(definition),
+      } as TextNodeData;
     } else {
       data = {
         destination: "./output/image.png",
@@ -257,6 +280,9 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       target: e.target,
     }));
 
+    // Get AI provider settings
+    const aiProviders = useSettingsStore.getState().getConfiguredProviders();
+
     // Set all nodes to "running" status
     const initialNodeStatus: Record<string, NodeExecutionStatus> = {};
     for (const node of nodes) {
@@ -264,11 +290,11 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     }
 
     set({
-      execution: { status: "running", imageIds: [], previews: {}, nodeStatus: initialNodeStatus },
+      execution: { status: "running", imageIds: [], previews: {}, dataOutputs: {}, nodeStatus: initialNodeStatus },
     });
 
     try {
-      const result = await executeWorkflow(studioNodes, studioEdges);
+      const result = await executeWorkflow(studioNodes, studioEdges, aiProviders);
 
       // Set all nodes to completed or error based on result
       const finalNodeStatus: Record<string, NodeExecutionStatus> = {};
@@ -282,6 +308,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
             status: "completed",
             imageIds: result.imageIds,
             previews: result.previews || {},
+            dataOutputs: result.dataOutputs || {},
             nodeStatus: finalNodeStatus,
           },
         });
@@ -291,6 +318,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
             status: "error",
             imageIds: [],
             previews: {},
+            dataOutputs: {},
             nodeStatus: finalNodeStatus,
             error: result.error,
           },
@@ -308,6 +336,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
           status: "error",
           imageIds: [],
           previews: {},
+          dataOutputs: {},
           nodeStatus: errorNodeStatus,
           error: error instanceof Error ? error.message : "Unknown error",
         },

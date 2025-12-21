@@ -3,7 +3,13 @@
  */
 
 // Node types in the visual editor
-export type StudioNodeType = "generator" | "transform" | "save" | "input";
+export type StudioNodeType =
+  | "generator"
+  | "transform"
+  | "save"
+  | "input"
+  | "vision"   // AI image analysis
+  | "text";    // AI text generation
 
 // Position on the canvas
 export interface Position {
@@ -36,12 +42,26 @@ export interface InputNodeData {
   mime?: string;          // Content type
 }
 
+// Vision node data (AI image analysis)
+export interface VisionNodeData {
+  providerName: string;   // e.g., "openai-vision", "ollama-vision"
+  params: Record<string, unknown>;  // prompt, outputFormat, etc.
+}
+
+// Text node data (AI text generation)
+export interface TextNodeData {
+  providerName: string;   // e.g., "openai-text", "ollama-text"
+  params: Record<string, unknown>;  // prompt, systemPrompt, temperature, etc.
+}
+
 // Union type for node data
 export type StudioNodeData =
   | GeneratorNodeData
   | TransformNodeData
   | SaveNodeData
-  | InputNodeData;
+  | InputNodeData
+  | VisionNodeData
+  | TextNodeData;
 
 // A node in the visual editor
 export interface StudioNode {
@@ -84,8 +104,14 @@ export interface ExecutionStepResult {
   stepIndex: number;
   nodeId: string;
   status: "running" | "completed" | "error";
+  // Image output (for generator, transform, input nodes)
   imageId?: string;
   preview?: string; // base64 thumbnail
+  // Text/JSON output (for vision, text nodes)
+  dataType?: "text" | "json";
+  content?: string;
+  parsed?: Record<string, unknown>;
+  // Error info
   error?: string;
 }
 

@@ -5,6 +5,8 @@ import type {
   TransformNodeData,
   SaveNodeData,
   InputNodeData,
+  VisionNodeData,
+  TextNodeData,
 } from "@floimg-studio/shared";
 import { useWorkflowStore } from "../stores/workflowStore";
 import { uploadImage, getUploadBlobUrl } from "../api/client";
@@ -322,9 +324,122 @@ export const InputNode = memo(function InputNode({
   );
 });
 
+// Vision Node (AI image analysis - has input and output)
+export const VisionNode = memo(function VisionNode({
+  id,
+  data,
+  selected,
+}: NodeProps<VisionNodeData>) {
+  const nodeStatus = useWorkflowStore((s) => s.execution.nodeStatus[id]);
+  const dataOutput = useWorkflowStore((s) => s.execution.dataOutputs?.[id]);
+
+  const executionClass = getExecutionClass(nodeStatus);
+  const borderClass = executionClass || (selected ? "border-cyan-500" : "border-cyan-200");
+
+  return (
+    <div
+      className={`rounded-lg border-2 bg-white dark:bg-zinc-800 shadow-md min-w-[180px] overflow-hidden ${borderClass}`}
+    >
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-3 h-3 !bg-cyan-500"
+      />
+      {dataOutput && (
+        <div className="bg-cyan-50 dark:bg-cyan-900/30 border-b border-cyan-100 dark:border-cyan-800 p-2 max-h-24 overflow-auto">
+          <pre className="text-xs text-cyan-800 dark:text-cyan-200 whitespace-pre-wrap">
+            {dataOutput.content?.slice(0, 200)}
+            {(dataOutput.content?.length || 0) > 200 && "..."}
+          </pre>
+        </div>
+      )}
+      <div className="px-4 py-3">
+        <div className="flex items-center gap-2 mb-2">
+          <svg className="w-3 h-3 text-cyan-500" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+            <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+          </svg>
+          <span className="font-semibold text-sm text-cyan-700 dark:text-cyan-400">
+            {data.providerName}
+          </span>
+        </div>
+        <div className="text-xs text-gray-500 dark:text-zinc-400">
+          {data.params.prompt ? (
+            <div className="truncate">
+              {String(data.params.prompt).slice(0, 30)}...
+            </div>
+          ) : null}
+        </div>
+      </div>
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-3 h-3 !bg-cyan-500"
+      />
+    </div>
+  );
+});
+
+// Text Node (AI text generation - has optional input and output)
+export const TextNode = memo(function TextNode({
+  id,
+  data,
+  selected,
+}: NodeProps<TextNodeData>) {
+  const nodeStatus = useWorkflowStore((s) => s.execution.nodeStatus[id]);
+  const dataOutput = useWorkflowStore((s) => s.execution.dataOutputs?.[id]);
+
+  const executionClass = getExecutionClass(nodeStatus);
+  const borderClass = executionClass || (selected ? "border-pink-500" : "border-pink-200");
+
+  return (
+    <div
+      className={`rounded-lg border-2 bg-white dark:bg-zinc-800 shadow-md min-w-[180px] overflow-hidden ${borderClass}`}
+    >
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-3 h-3 !bg-pink-500"
+      />
+      {dataOutput && (
+        <div className="bg-pink-50 dark:bg-pink-900/30 border-b border-pink-100 dark:border-pink-800 p-2 max-h-24 overflow-auto">
+          <pre className="text-xs text-pink-800 dark:text-pink-200 whitespace-pre-wrap">
+            {dataOutput.content?.slice(0, 200)}
+            {(dataOutput.content?.length || 0) > 200 && "..."}
+          </pre>
+        </div>
+      )}
+      <div className="px-4 py-3">
+        <div className="flex items-center gap-2 mb-2">
+          <svg className="w-3 h-3 text-pink-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clipRule="evenodd" />
+          </svg>
+          <span className="font-semibold text-sm text-pink-700 dark:text-pink-400">
+            {data.providerName}
+          </span>
+        </div>
+        <div className="text-xs text-gray-500 dark:text-zinc-400">
+          {data.params.prompt ? (
+            <div className="truncate">
+              {String(data.params.prompt).slice(0, 30)}...
+            </div>
+          ) : null}
+        </div>
+      </div>
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-3 h-3 !bg-pink-500"
+      />
+    </div>
+  );
+});
+
 export const nodeTypes = {
   generator: GeneratorNode,
   transform: TransformNode,
   save: SaveNode,
   input: InputNode,
+  vision: VisionNode,
+  text: TextNode,
 };

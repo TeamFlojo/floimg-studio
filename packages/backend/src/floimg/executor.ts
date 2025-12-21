@@ -15,6 +15,8 @@ import type {
   TransformNodeData,
   SaveNodeData,
   InputNodeData,
+  VisionNodeData,
+  TextNodeData,
   ExecutionStepResult,
   ImageMetadata,
 } from "@floimg-studio/shared";
@@ -41,10 +43,36 @@ const MIME_TO_EXT: Record<string, string> = {
   "image/avif": "avif",
 };
 
+// Node output types - supports both image and text data
+interface ImageOutput {
+  kind: "image";
+  bytes: Buffer;
+  mime: string;
+}
+
+interface DataOutput {
+  kind: "data";
+  dataType: "text" | "json";
+  content: string;
+  parsed?: Record<string, unknown>;
+}
+
+type NodeOutput = ImageOutput | DataOutput | null;
+
 export interface ExecutionCallbacks {
   onStep?: (result: ExecutionStepResult) => void;
   onComplete?: (imageIds: string[]) => void;
   onError?: (error: string) => void;
+}
+
+// AI provider configuration from frontend
+export interface AIProviderConfig {
+  openai?: { apiKey: string };
+  anthropic?: { apiKey: string };
+  gemini?: { apiKey: string };
+  openrouter?: { apiKey: string };
+  ollama?: { baseUrl: string };
+  lmstudio?: { baseUrl: string };
 }
 
 export interface ExecutionOptions {
@@ -52,12 +80,15 @@ export interface ExecutionOptions {
   templateId?: string;
   /** Callbacks for execution events */
   callbacks?: ExecutionCallbacks;
+  /** AI provider configurations (API keys, base URLs) */
+  aiProviders?: AIProviderConfig;
 }
 
 export interface ExecutionResult {
   imageIds: string[];
   images: Map<string, Buffer>;
   nodeIdByImageId: Map<string, string>;
+  dataOutputs: Map<string, DataOutput>;
 }
 
 /**
@@ -120,27 +151,31 @@ function findReadyNodes(
 
 /**
  * Execute a single node and return the result
+ * Supports both image-producing nodes (generator, transform, input)
+ * and data-producing nodes (vision, text)
  */
 async function executeNode(
   node: StudioNode,
   edges: StudioEdge[],
-  variables: Map<string, { bytes: Buffer; mime: string }>,
+  variables: Map<string, NodeOutput>,
   client: ReturnType<typeof getClient>
-): Promise<{ bytes: Buffer; mime: string } | null> {
+): Promise<NodeOutput> {
   if (node.type === "generator") {
     const data = node.data as GeneratorNodeData;
     const result = await client.generate({
       generator: data.generatorName,
       params: data.params,
     });
-    return { bytes: result.bytes, mime: result.mime };
+    return { kind: "image", bytes: result.bytes, mime: result.mime };
   } else if (node.type === "transform") {
     const data = node.data as TransformNodeData;
     const inputEdge = edges.find((e) => e.target === node.id);
     if (!inputEdge) throw new Error(`No input for transform node ${node.id}`);
 
     const input = variables.get(inputEdge.source);
-    if (!input) throw new Error(`Input not found for node ${node.id}`);
+    if (!input || input.kind !== "image") {
+      throw new Error(`Transform node ${node.id} requires image input`);
+    }
 
     // Extract 'to' from params for convert operation (floimg expects it at top level)
     const { to, ...restParams } = data.params as { to?: string; [key: string]: unknown };
@@ -177,14 +212,16 @@ async function executeNode(
       to: to as "image/png" | "image/jpeg" | "image/svg+xml" | "image/webp" | "image/avif" | undefined,
       params: restParams,
     });
-    return { bytes: result.bytes, mime: result.mime };
+    return { kind: "image", bytes: result.bytes, mime: result.mime };
   } else if (node.type === "save") {
     const data = node.data as SaveNodeData;
     const inputEdge = edges.find((e) => e.target === node.id);
     if (!inputEdge) throw new Error(`No input for save node ${node.id}`);
 
     const input = variables.get(inputEdge.source);
-    if (!input) throw new Error(`Input not found for node ${node.id}`);
+    if (!input || input.kind !== "image") {
+      throw new Error(`Save node ${node.id} requires image input`);
+    }
 
     await client.save(
       {
@@ -210,7 +247,63 @@ async function executeNode(
       throw new Error(`Upload not found: ${data.uploadId}`);
     }
 
-    return { bytes: upload.bytes, mime: upload.mime };
+    return { kind: "image", bytes: upload.bytes, mime: upload.mime };
+  } else if (node.type === "vision") {
+    // Vision node: analyze an image with AI
+    const data = node.data as VisionNodeData;
+    const inputEdge = edges.find((e) => e.target === node.id);
+    if (!inputEdge) throw new Error(`No input for vision node ${node.id}`);
+
+    const input = variables.get(inputEdge.source);
+    if (!input || input.kind !== "image") {
+      throw new Error(`Vision node ${node.id} requires image input`);
+    }
+
+    const result = await client.analyzeImage({
+      provider: data.providerName,
+      blob: {
+        bytes: input.bytes,
+        mime: input.mime as
+          | "image/png"
+          | "image/jpeg"
+          | "image/svg+xml"
+          | "image/webp"
+          | "image/avif",
+      },
+      params: data.params,
+    });
+
+    return {
+      kind: "data",
+      dataType: result.type,
+      content: result.content,
+      parsed: result.parsed,
+    };
+  } else if (node.type === "text") {
+    // Text node: generate text with AI (optionally using context from previous step)
+    const data = node.data as TextNodeData;
+    const inputEdge = edges.find((e) => e.target === node.id);
+
+    // If there's an input edge, get context from previous step
+    let context: string | undefined;
+    if (inputEdge) {
+      const input = variables.get(inputEdge.source);
+      if (input && input.kind === "data") {
+        context = input.content;
+      }
+    }
+
+    const result = await client.generateText({
+      provider: data.providerName,
+      params: { ...data.params, context },
+    });
+
+    return {
+      kind: "data",
+      dataType: result.type,
+      content: result.content,
+      parsed: result.parsed,
+    };
   }
 
   return null;
@@ -235,11 +328,12 @@ export async function executeWorkflow(
   const imageIds: string[] = [];
   const images = new Map<string, Buffer>();
   const nodeIdByImageId = new Map<string, string>();
+  const dataOutputs = new Map<string, DataOutput>();
 
   // Track execution state
   const completed = new Set<string>();
   const running = new Set<string>();
-  const variables = new Map<string, { bytes: Buffer; mime: string }>();
+  const variables = new Map<string, NodeOutput>();
 
   // Build dependency graph
   const { dependencies } = buildDependencyGraph(nodes, edges);
@@ -295,81 +389,102 @@ export async function executeWorkflow(
 
             // Store result for downstream nodes
             if (result) {
-              // SCAN BEFORE SAVE: Moderate image before writing to disk
-              if (isModerationEnabled()) {
-                try {
-                  const moderationResult = await moderateImage(result.bytes, result.mime);
-                  if (moderationResult.flagged) {
-                    await logModerationIncident("generated", moderationResult, {
-                      nodeId: node.id,
-                      nodeType: node.type,
-                    });
-                    throw new Error(
-                      `Content policy violation: Image flagged for ${moderationResult.flaggedCategories.join(", ")}. ` +
-                      `This content cannot be saved.`
-                    );
-                  }
-                } catch (moderationError) {
-                  // Check if it's a policy violation (our own error) vs API error
-                  if (moderationError instanceof Error &&
-                      moderationError.message.includes("Content policy violation")) {
-                    throw moderationError;
-                  }
-                  // API/service error
-                  console.error("Moderation check failed:", moderationError);
-                  if (isStrictModeEnabled()) {
-                    await logModerationIncident("error", {
-                      safe: false,
-                      flagged: true,
-                      categories: {} as never,
-                      categoryScores: {},
-                      flaggedCategories: ["moderation_service_error"],
-                    }, {
-                      nodeId: node.id,
-                      nodeType: node.type,
-                      error: String(moderationError),
-                    });
-                    throw new Error(
-                      "Content moderation service unavailable. Generation blocked for safety."
-                    );
-                  }
-                  console.warn("Moderation failed but strict mode is OFF - allowing generation");
-                }
-              }
-
               variables.set(node.id, result);
 
-              // Save intermediate image (only reached if moderation passed)
-              const imageId = `img_${Date.now()}_${nanoid(6)}`;
-              const ext = MIME_TO_EXT[result.mime] || "png";
-              const filename = `${imageId}.${ext}`;
-              const imagePath = join(OUTPUT_DIR, filename);
+              // Handle image output (generate, transform, input nodes)
+              if (result.kind === "image") {
+                // SCAN BEFORE SAVE: Moderate image before writing to disk
+                if (isModerationEnabled()) {
+                  try {
+                    const moderationResult = await moderateImage(result.bytes, result.mime);
+                    if (moderationResult.flagged) {
+                      await logModerationIncident("generated", moderationResult, {
+                        nodeId: node.id,
+                        nodeType: node.type,
+                      });
+                      throw new Error(
+                        `Content policy violation: Image flagged for ${moderationResult.flaggedCategories.join(", ")}. ` +
+                        `This content cannot be saved.`
+                      );
+                    }
+                  } catch (moderationError) {
+                    // Check if it's a policy violation (our own error) vs API error
+                    if (moderationError instanceof Error &&
+                        moderationError.message.includes("Content policy violation")) {
+                      throw moderationError;
+                    }
+                    // API/service error
+                    console.error("Moderation check failed:", moderationError);
+                    if (isStrictModeEnabled()) {
+                      await logModerationIncident("error", {
+                        safe: false,
+                        flagged: true,
+                        categories: {} as never,
+                        categoryScores: {},
+                        flaggedCategories: ["moderation_service_error"],
+                      }, {
+                        nodeId: node.id,
+                        nodeType: node.type,
+                        error: String(moderationError),
+                      });
+                      throw new Error(
+                        "Content moderation service unavailable. Generation blocked for safety."
+                      );
+                    }
+                    console.warn("Moderation failed but strict mode is OFF - allowing generation");
+                  }
+                }
 
-              await mkdir(dirname(imagePath), { recursive: true });
-              await writeFile(imagePath, result.bytes);
+                // Save intermediate image (only reached if moderation passed)
+                const imageId = `img_${Date.now()}_${nanoid(6)}`;
+                const ext = MIME_TO_EXT[result.mime] || "png";
+                const filename = `${imageId}.${ext}`;
+                const imagePath = join(OUTPUT_DIR, filename);
 
-              // Write metadata sidecar file (enables "what workflow created this?" queries)
-              const metadata: ImageMetadata = {
-                id: imageId,
-                filename,
-                mime: result.mime,
-                size: result.bytes.length,
-                createdAt: Date.now(),
-                workflow: {
-                  nodes,
-                  edges,
-                  executedAt: Date.now(),
-                  templateId,
-                },
-              };
-              const metadataPath = join(OUTPUT_DIR, `${imageId}.meta.json`);
-              await writeFile(metadataPath, JSON.stringify(metadata, null, 2));
+                await mkdir(dirname(imagePath), { recursive: true });
+                await writeFile(imagePath, result.bytes);
 
-              imageIds.push(imageId);
-              images.set(imageId, result.bytes);
-              nodeIdByImageId.set(imageId, node.id);
+                // Write metadata sidecar file (enables "what workflow created this?" queries)
+                const metadata: ImageMetadata = {
+                  id: imageId,
+                  filename,
+                  mime: result.mime,
+                  size: result.bytes.length,
+                  createdAt: Date.now(),
+                  workflow: {
+                    nodes,
+                    edges,
+                    executedAt: Date.now(),
+                    templateId,
+                  },
+                };
+                const metadataPath = join(OUTPUT_DIR, `${imageId}.meta.json`);
+                await writeFile(metadataPath, JSON.stringify(metadata, null, 2));
 
-              return { node, imageId, success: true };
+                imageIds.push(imageId);
+                images.set(imageId, result.bytes);
+                nodeIdByImageId.set(imageId, node.id);
+
+                return { node, imageId, success: true };
+              }
+
+              // Handle data output (vision, text nodes)
+              if (result.kind === "data") {
+                // Store for return value
+                dataOutputs.set(node.id, {
+                  kind: "data",
+                  dataType: result.dataType,
+                  content: result.content,
+                  parsed: result.parsed,
+                });
+                return {
+                  node,
+                  dataType: result.dataType,
+                  content: result.content,
+                  parsed: result.parsed,
+                  success: true,
+                };
+              }
             }
 
             return { node, success: true };
@@ -386,7 +501,7 @@ export async function executeWorkflow(
       // Process results
       for (const settledResult of results) {
         if (settledResult.status === "fulfilled") {
-          const { node, imageId, success, error } = settledResult.value;
+          const { node, imageId, dataType, content, parsed, success, error } = settledResult.value;
           running.delete(node.id);
 
           if (success) {
@@ -395,7 +510,12 @@ export async function executeWorkflow(
               stepIndex: waveIndex,
               nodeId: node.id,
               status: "completed",
+              // Image output
               imageId,
+              // Data output (for vision/text nodes)
+              dataType,
+              content,
+              parsed,
             });
           } else {
             callbacks?.onStep?.({
@@ -417,7 +537,7 @@ export async function executeWorkflow(
     }
 
     callbacks?.onComplete?.(imageIds);
-    return { imageIds, images, nodeIdByImageId };
+    return { imageIds, images, nodeIdByImageId, dataOutputs };
   } catch (error) {
     callbacks?.onError?.(
       error instanceof Error ? error.message : String(error)
@@ -495,6 +615,30 @@ export function toPipeline(
         in: inputVar,
         destination: data.destination,
         provider: data.provider,
+      });
+    } else if (node.type === "vision") {
+      const data = node.data as VisionNodeData;
+      const inputEdge = edges.find((e) => e.target === node.id);
+      const inputVar = inputEdge ? nodeToVar.get(inputEdge.source) : undefined;
+
+      steps.push({
+        kind: "vision",
+        provider: data.providerName,
+        in: inputVar,
+        params: data.params,
+        out: varName,
+      });
+    } else if (node.type === "text") {
+      const data = node.data as TextNodeData;
+      const inputEdge = edges.find((e) => e.target === node.id);
+      const inputVar = inputEdge ? nodeToVar.get(inputEdge.source) : undefined;
+
+      steps.push({
+        kind: "text",
+        provider: data.providerName,
+        in: inputVar,
+        params: data.params,
+        out: varName,
       });
     }
   }

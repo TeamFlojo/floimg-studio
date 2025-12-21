@@ -3,3 +3,5 @@ onlyBuiltDependencies:
   - sharp
 packages:
   - "packages/*"
+  # Local floimg development (for unpublished changes)
+  - "../floimg/packages/*"
