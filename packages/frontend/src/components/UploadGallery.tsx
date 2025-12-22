@@ -59,7 +59,7 @@ export function UploadGallery({ onSelect }: UploadGalleryProps) {
         {error}
         <button
           onClick={fetchUploads}
-          className="ml-2 text-violet-500 dark:text-violet-400 hover:underline"
+          className="ml-2 text-teal-500 dark:text-teal-400 hover:underline"
         >
           Retry
         </button>
