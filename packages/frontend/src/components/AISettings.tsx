@@ -91,7 +91,7 @@ function CloudProviderRow({
             href={provider.docsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-violet-600 dark:text-violet-400 hover:underline"
+            className="text-xs text-teal-600 dark:text-teal-400 hover:underline"
           >
             Get API key
           </a>
@@ -128,7 +128,7 @@ function CloudProviderRow({
         <button
           onClick={handleToggle}
           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-            isEnabled ? "bg-violet-600" : "bg-gray-300 dark:bg-zinc-600"
+            isEnabled ? "bg-teal-600" : "bg-gray-300 dark:bg-zinc-600"
           }`}
         >
           <span
@@ -182,7 +182,7 @@ function LocalProviderRow({
             href={provider.docsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-violet-600 dark:text-violet-400 hover:underline"
+            className="text-xs text-teal-600 dark:text-teal-400 hover:underline"
           >
             Docs
           </a>
@@ -207,7 +207,7 @@ function LocalProviderRow({
         <button
           onClick={handleToggle}
           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-            isEnabled ? "bg-violet-600" : "bg-gray-300 dark:bg-zinc-600"
+            isEnabled ? "bg-teal-600" : "bg-gray-300 dark:bg-zinc-600"
           }`}
         >
           <span
@@ -296,7 +296,7 @@ export function AISettings() {
         <div className="flex justify-end px-6 py-4 border-t border-gray-200 dark:border-zinc-700">
           <button
             onClick={closeSettings}
-            className="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-md hover:bg-violet-700"
+            className="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-md hover:bg-teal-700"
           >
             Done
           </button>

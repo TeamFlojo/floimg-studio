@@ -54,7 +54,7 @@ export function TemplateGallery({ onSelect }: TemplateGalleryProps) {
           placeholder="Search templates..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent w-64"
+          className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-500 focus:border-transparent w-64"
         />
 
         <div className="flex gap-2 flex-wrap">
@@ -62,7 +62,7 @@ export function TemplateGallery({ onSelect }: TemplateGalleryProps) {
             onClick={() => setSelectedCategory(null)}
             className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
               selectedCategory === null
-                ? "bg-violet-600 text-white"
+                ? "bg-teal-600 text-white"
                 : "bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-zinc-300 hover:bg-gray-300 dark:hover:bg-zinc-600"
             }`}
           >
@@ -74,7 +74,7 @@ export function TemplateGallery({ onSelect }: TemplateGalleryProps) {
               onClick={() => setSelectedCategory(category)}
               className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 selectedCategory === category
-                  ? "bg-violet-600 text-white"
+                  ? "bg-teal-600 text-white"
                   : "bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-zinc-300 hover:bg-gray-300 dark:hover:bg-zinc-600"
               }`}
             >
@@ -216,7 +216,7 @@ function TemplateCard({ template, onSelect }: TemplateCardProps) {
         {/* Action button */}
         <button
           onClick={onSelect}
-          className="w-full py-2 px-4 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-colors"
+          className="w-full py-2 px-4 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition-colors"
         >
           Use Template
         </button>

@@ -32,7 +32,7 @@ export function AuthModal() {
           <div className="space-y-3">
             <button
               onClick={handleSignup}
-              className="w-full px-4 py-3 text-sm font-medium text-white bg-violet-600 rounded-md hover:bg-violet-700 transition-colors"
+              className="w-full px-4 py-3 text-sm font-medium text-white bg-teal-600 rounded-md hover:bg-teal-700 transition-colors"
             >
               Sign up free
             </button>

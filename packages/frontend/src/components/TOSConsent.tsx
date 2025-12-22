@@ -46,7 +46,7 @@ export function TOSConsent({ onAccept }: TOSConsentProps) {
               type="checkbox"
               checked={isChecked}
               onChange={(e) => setIsChecked(e.target.checked)}
-              className="mt-1 w-4 h-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500"
+              className="mt-1 w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
             />
             <span className="text-sm text-gray-700 dark:text-zinc-300">
               I agree to the{" "}
@@ -54,7 +54,7 @@ export function TOSConsent({ onAccept }: TOSConsentProps) {
                 href="https://floimg.com/terms"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-violet-600 dark:text-violet-400 hover:underline"
+                className="text-teal-600 dark:text-teal-400 hover:underline"
               >
                 Terms of Service
               </a>{" "}
@@ -63,7 +63,7 @@ export function TOSConsent({ onAccept }: TOSConsentProps) {
                 href="https://floimg.com/content-policy"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-violet-600 dark:text-violet-400 hover:underline"
+                className="text-teal-600 dark:text-teal-400 hover:underline"
               >
                 Content Policy
               </a>
@@ -75,7 +75,7 @@ export function TOSConsent({ onAccept }: TOSConsentProps) {
             disabled={!isChecked}
             className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
               isChecked
-                ? "bg-violet-600 hover:bg-violet-700 text-white"
+                ? "bg-teal-600 hover:bg-teal-700 text-white"
                 : "bg-gray-200 dark:bg-zinc-700 text-gray-400 dark:text-zinc-500 cursor-not-allowed"
             }`}
           >

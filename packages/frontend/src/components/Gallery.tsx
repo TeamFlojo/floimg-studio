@@ -78,7 +78,7 @@ export function Gallery() {
         </h2>
         <button
           onClick={() => refetch()}
-          className="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300"
+          className="text-sm text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-violet-300"
         >
           Refresh
         </button>
@@ -139,7 +139,7 @@ function ImageCard({ image, onLoadWorkflow, isLoading }: ImageCardProps) {
               onLoadWorkflow();
             }}
             disabled={isLoading}
-            className="px-3 py-1.5 bg-violet-600 text-white text-sm rounded-lg hover:bg-violet-700 disabled:opacity-50"
+            className="px-3 py-1.5 bg-teal-600 text-white text-sm rounded-lg hover:bg-teal-700 disabled:opacity-50"
           >
             {isLoading ? "Loading..." : "Load Workflow"}
           </button>

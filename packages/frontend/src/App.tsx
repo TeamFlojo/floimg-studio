@@ -135,7 +135,7 @@ function App() {
               onClick={() => setActiveTab("editor")}
               className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === "editor"
-                  ? "border-violet-500 text-violet-600 dark:text-violet-400"
+                  ? "border-teal-500 text-teal-600 dark:text-teal-400"
                   : "border-transparent text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200"
               }`}
             >
@@ -145,7 +145,7 @@ function App() {
               onClick={() => setActiveTab("gallery")}
               className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === "gallery"
-                  ? "border-violet-500 text-violet-600 dark:text-violet-400"
+                  ? "border-teal-500 text-teal-600 dark:text-teal-400"
                   : "border-transparent text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200"
               }`}
             >
@@ -155,7 +155,7 @@ function App() {
               onClick={() => setActiveTab("templates")}
               className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === "templates"
-                  ? "border-violet-500 text-violet-600 dark:text-violet-400"
+                  ? "border-teal-500 text-teal-600 dark:text-teal-400"
                   : "border-transparent text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200"
               }`}
             >

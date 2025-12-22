@@ -117,7 +117,7 @@ interface FieldEditorProps {
 
 function FieldEditor({ name, field, value, onChange }: FieldEditorProps) {
   const label = field.title || name;
-  const inputClasses = "w-full px-3 py-2 border border-gray-300 dark:border-zinc-600 rounded-md shadow-sm focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100";
+  const inputClasses = "w-full px-3 py-2 border border-gray-300 dark:border-zinc-600 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100";
 
   // Enum -> select dropdown
   if (field.enum) {
@@ -175,7 +175,7 @@ function FieldEditor({ name, field, value, onChange }: FieldEditorProps) {
           type="checkbox"
           checked={Boolean(value)}
           onChange={(e) => onChange(e.target.checked)}
-          className="h-4 w-4 text-violet-600 focus:ring-violet-500 border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900"
+          className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900"
         />
         <label className="text-sm font-medium text-gray-700 dark:text-zinc-300">{label}</label>
       </div>

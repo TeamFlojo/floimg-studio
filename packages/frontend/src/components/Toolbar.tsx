@@ -100,7 +100,7 @@ export function Toolbar() {
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className="flex items-center gap-2 p-1 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-700"
                   >
-                    <div className="w-8 h-8 rounded-full bg-violet-600 text-white flex items-center justify-center text-sm font-medium">
+                    <div className="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center text-sm font-medium">
                       {getInitials()}
                     </div>
                   </button>
@@ -114,7 +114,7 @@ export function Toolbar() {
                         <p className="text-xs text-gray-500 dark:text-zinc-400 truncate">
                           {user.email}
                         </p>
-                        <p className="text-xs text-violet-600 dark:text-violet-400 mt-1 capitalize">
+                        <p className="text-xs text-teal-600 dark:text-teal-400 mt-1 capitalize">
                           {user.tier} plan
                         </p>
                       </div>
@@ -140,7 +140,7 @@ export function Toolbar() {
                   </a>
                   <a
                     href={getSignupUrl()}
-                    className="px-3 py-1.5 text-sm font-medium text-white bg-violet-600 rounded-md hover:bg-violet-700"
+                    className="px-3 py-1.5 text-sm font-medium text-white bg-teal-600 rounded-md hover:bg-teal-700"
                   >
                     Sign up
                   </a>
@@ -171,7 +171,7 @@ export function Toolbar() {
           <button
             onClick={handleExecute}
             disabled={nodes.length === 0 || execution.status === "running"}
-            className="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-md hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {execution.status === "running" ? (
               <>
@@ -298,7 +298,7 @@ export function Toolbar() {
               </button>
               <button
                 onClick={() => setShowYaml(false)}
-                className="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-md hover:bg-violet-700"
+                className="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-md hover:bg-teal-700"
               >
                 Close
               </button>

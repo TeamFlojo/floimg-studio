@@ -129,7 +129,7 @@ export const TransformNode = memo(function TransformNode({
   const previewVisible = useWorkflowStore((s) => s.previewVisible[id] !== false);
 
   const executionClass = getExecutionClass(nodeStatus);
-  const borderClass = executionClass || (selected ? "border-purple-500" : "border-purple-200");
+  const borderClass = executionClass || (selected ? "border-teal-500" : "border-teal-200");
 
   return (
     <div
@@ -138,7 +138,7 @@ export const TransformNode = memo(function TransformNode({
       <Handle
         type="target"
         position={Position.Left}
-        className="w-3 h-3 !bg-purple-500"
+        className="w-3 h-3 !bg-teal-500"
       />
       {preview && previewVisible && (
         <div className="bg-gray-100 dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-700">
@@ -151,11 +151,11 @@ export const TransformNode = memo(function TransformNode({
       )}
       <div className="px-4 py-3">
         <div className="flex items-center gap-2 mb-2">
-          <div className="w-3 h-3 rounded-full bg-purple-500" />
-          <span className="font-semibold text-sm text-purple-700 dark:text-purple-400">
+          <div className="w-3 h-3 rounded-full bg-teal-500" />
+          <span className="font-semibold text-sm text-teal-700 dark:text-teal-400">
             {data.operation}
           </span>
-          <PreviewToggle nodeId={id} color="text-purple-500 dark:text-purple-400" />
+          <PreviewToggle nodeId={id} color="text-teal-500 dark:text-teal-400" />
         </div>
         <div className="text-xs text-gray-500 dark:text-zinc-400">
           {Object.entries(data.params)
@@ -170,7 +170,7 @@ export const TransformNode = memo(function TransformNode({
       <Handle
         type="source"
         position={Position.Right}
-        className="w-3 h-3 !bg-purple-500"
+        className="w-3 h-3 !bg-teal-500"
       />
     </div>
   );

@@ -167,7 +167,7 @@ export function NodePalette() {
 
         {/* Transforms */}
         <div className="mb-6">
-          <h3 className="text-sm font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wide mb-2">
+          <h3 className="text-sm font-medium text-teal-600 dark:text-teal-400 uppercase tracking-wide mb-2">
             Transforms
           </h3>
           {Object.entries(transformsByCategory).map(([category, nodes]) => (
@@ -179,9 +179,9 @@ export function NodePalette() {
                   draggable
                   onDragStart={(e) => handleDragStart(e, def)}
                   onDoubleClick={() => handleDoubleClick(def)}
-                  className="px-3 py-2 bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700 rounded mb-1 cursor-grab active:cursor-grabbing hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
+                  className="px-3 py-2 bg-teal-50 dark:bg-teal-900/30 border border-teal-200 dark:border-teal-700 rounded mb-1 cursor-grab active:cursor-grabbing hover:bg-teal-100 dark:hover:bg-teal-900/50 transition-colors"
                 >
-                  <div className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                  <div className="text-sm font-medium text-teal-700 dark:text-teal-300">
                     {def.label}
                   </div>
                   {def.description && (
