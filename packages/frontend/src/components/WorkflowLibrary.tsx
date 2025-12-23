@@ -188,6 +188,7 @@ export function WorkflowLibrary() {
             onClick={() => {
               newWorkflow();
               toggleLibrary();
+              window.dispatchEvent(new window.CustomEvent("new-workflow-created"));
             }}
             className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors"
           >

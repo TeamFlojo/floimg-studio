@@ -20,6 +20,7 @@ export function Toolbar() {
   const hasUnsavedChanges = useWorkflowStore((s) => s.hasUnsavedChanges);
   const saveWorkflow = useWorkflowStore((s) => s.saveWorkflow);
   const toggleLibrary = useWorkflowStore((s) => s.toggleLibrary);
+  const setActiveWorkflowName = useWorkflowStore((s) => s.setActiveWorkflowName);
 
   // Auth state
   const user = useAuthStore((s) => s.user);
@@ -34,7 +35,19 @@ export function Toolbar() {
   const [yamlContent, setYamlContent] = useState("");
   const [jsContent, setJsContent] = useState("");
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [notification, setNotification] = useState<string | null>(null);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editingName, setEditingName] = useState("");
+
+  // Listen for new workflow event
+  useEffect(() => {
+    const handleNewWorkflow = () => {
+      setNotification("New workflow created");
+      setTimeout(() => setNotification(null), 2000);
+    };
+    window.addEventListener("new-workflow-created", handleNewWorkflow);
+    return () => window.removeEventListener("new-workflow-created", handleNewWorkflow);
+  }, []);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const userMenuRef = useRef<any>(null);
 
@@ -42,9 +55,23 @@ export function Toolbar() {
   const handleSave = useCallback(() => {
     if (nodes.length === 0) return;
     saveWorkflow();
-    setSaveMessage("Saved!");
-    setTimeout(() => setSaveMessage(null), 2000);
+    setNotification("Saved!");
+    setTimeout(() => setNotification(null), 2000);
   }, [nodes.length, saveWorkflow]);
+
+  // Handle inline rename
+  const handleStartRename = () => {
+    setEditingName(activeWorkflowName);
+    setIsEditingName(true);
+  };
+
+  const handleSaveRename = () => {
+    const trimmed = editingName.trim();
+    if (trimmed && trimmed !== activeWorkflowName) {
+      setActiveWorkflowName(trimmed);
+    }
+    setIsEditingName(false);
+  };
 
   // Keyboard shortcut for save
   useEffect(() => {
@@ -137,16 +164,38 @@ export function Toolbar() {
             </a>
           </div>
 
-          {/* Workflow name and status */}
+          {/* Workflow name and status - click to rename */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-700 dark:text-zinc-300 font-medium">
-              {activeWorkflowName}
-            </span>
+            {isEditingName ? (
+              <input
+                type="text"
+                value={editingName}
+                onChange={(e) => setEditingName(e.target.value)}
+                onBlur={handleSaveRename}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSaveRename();
+                  if (e.key === "Escape") {
+                    setEditingName(activeWorkflowName);
+                    setIsEditingName(false);
+                  }
+                }}
+                className="w-48 px-2 py-1 text-sm font-medium bg-white dark:bg-zinc-900 border border-teal-500 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 text-gray-900 dark:text-zinc-100"
+                autoFocus
+              />
+            ) : (
+              <button
+                onClick={handleStartRename}
+                className="text-sm text-gray-700 dark:text-zinc-300 font-medium hover:text-gray-900 dark:hover:text-zinc-100 rounded px-2 py-1 -mx-2 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors"
+                title="Click to rename"
+              >
+                {activeWorkflowName}
+              </button>
+            )}
             {hasUnsavedChanges && (
               <span className="text-xs text-amber-600 dark:text-amber-400">(unsaved)</span>
             )}
-            {saveMessage && (
-              <span className="text-xs text-green-600 dark:text-green-400">{saveMessage}</span>
+            {notification && (
+              <span className="text-xs text-green-600 dark:text-green-400">{notification}</span>
             )}
           </div>
 
