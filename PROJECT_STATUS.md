@@ -9,10 +9,10 @@
 Enable save/load workflows to localStorage, add JavaScript code export.
 
 - [x] Add persist middleware to workflowStore
-- [ ] Create WorkflowLibrary component
-- [ ] Add JS tab to export modal
-- [ ] Create codeGenerator utility
-- [ ] Test and polish
+- [x] Create WorkflowLibrary component
+- [x] Add JS tab to export modal
+- [x] Create codeGenerator utility
+- [ ] Test and verify
 
 ## Recent Progress
 
