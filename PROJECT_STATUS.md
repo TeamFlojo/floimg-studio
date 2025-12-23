@@ -4,7 +4,7 @@
 
 ## Current Focus
 
-### T-2025-001: Workflow Persistence and Code Export (in-progress)
+### T-2025-001: Workflow Persistence and Code Export (complete)
 
 Enable save/load workflows to localStorage, add JavaScript code export.
 
@@ -12,7 +12,7 @@ Enable save/load workflows to localStorage, add JavaScript code export.
 - [x] Create WorkflowLibrary component
 - [x] Add JS tab to export modal
 - [x] Create codeGenerator utility
-- [ ] Test and verify
+- [x] Test and verify
 
 ## Recent Progress
 
