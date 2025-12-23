@@ -1,10 +1,20 @@
 # PROJECT STATUS
 
-**Last Updated**: 2025-12-20
+**Last Updated**: 2025-12-22
 
 ## Current Focus
 
-No active tasks. Use `/p [description]` to plan new work.
+### T-2025-001: Workflow Persistence and Code Export (PR #2)
+
+Enable save/load workflows to localStorage, add JavaScript code export.
+
+- [x] Add persist middleware to workflowStore
+- [x] Create WorkflowLibrary component
+- [x] Add JS tab to export modal
+- [x] Create codeGenerator utility
+- [x] Test and verify
+- [x] UX: Click-to-rename workflow name in toolbar
+- [x] UX: Toast notification on "New Workflow"
 
 ## Recent Progress
 
@@ -32,5 +42,5 @@ No active tasks. Use `/p [description]` to plan new work.
 ## Notes
 
 - Early stage project (v0.1.0)
-- Depends on floimg workspace:* (linked for development)
+- Depends on floimg workspace:\* (linked for development)
 - AI features require user-provided API keys (BYOK)

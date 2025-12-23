@@ -1,15 +1,26 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useWorkflowStore } from "../stores/workflowStore";
 import { useSettingsStore } from "../stores/settingsStore";
 import { useAuthStore, getSignupUrl, getLoginUrl } from "../stores/authStore";
 import { getImageUrl } from "../api/client";
+import { generateJavaScript } from "../utils/codeGenerator";
+
+type ExportTab = "yaml" | "javascript";
 
 export function Toolbar() {
   const execution = useWorkflowStore((s) => s.execution);
   const execute = useWorkflowStore((s) => s.execute);
   const exportToYaml = useWorkflowStore((s) => s.exportToYaml);
   const nodes = useWorkflowStore((s) => s.nodes);
+  const edges = useWorkflowStore((s) => s.edges);
   const openSettings = useSettingsStore((s) => s.openSettings);
+
+  // Workflow persistence state
+  const activeWorkflowName = useWorkflowStore((s) => s.activeWorkflowName);
+  const hasUnsavedChanges = useWorkflowStore((s) => s.hasUnsavedChanges);
+  const saveWorkflow = useWorkflowStore((s) => s.saveWorkflow);
+  const toggleLibrary = useWorkflowStore((s) => s.toggleLibrary);
+  const setActiveWorkflowName = useWorkflowStore((s) => s.setActiveWorkflowName);
 
   // Auth state
   const user = useAuthStore((s) => s.user);
@@ -19,15 +30,65 @@ export function Toolbar() {
   const logout = useAuthStore((s) => s.logout);
   const guestUsage = useAuthStore((s) => s.guestUsage);
 
-  const [showYaml, setShowYaml] = useState(false);
+  const [showExport, setShowExport] = useState(false);
+  const [exportTab, setExportTab] = useState<ExportTab>("yaml");
   const [yamlContent, setYamlContent] = useState("");
+  const [jsContent, setJsContent] = useState("");
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const userMenuRef = useRef<HTMLDivElement>(null);
+  const [notification, setNotification] = useState<string | null>(null);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editingName, setEditingName] = useState("");
+
+  // Listen for new workflow event
+  useEffect(() => {
+    const handleNewWorkflow = () => {
+      setNotification("New workflow created");
+      setTimeout(() => setNotification(null), 2000);
+    };
+    window.addEventListener("new-workflow-created", handleNewWorkflow);
+    return () => window.removeEventListener("new-workflow-created", handleNewWorkflow);
+  }, []);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userMenuRef = useRef<any>(null);
+
+  // Handle save with Cmd+S / Ctrl+S
+  const handleSave = useCallback(() => {
+    if (nodes.length === 0) return;
+    saveWorkflow();
+    setNotification("Saved!");
+    setTimeout(() => setNotification(null), 2000);
+  }, [nodes.length, saveWorkflow]);
+
+  // Handle inline rename
+  const handleStartRename = () => {
+    setEditingName(activeWorkflowName);
+    setIsEditingName(true);
+  };
+
+  const handleSaveRename = () => {
+    const trimmed = editingName.trim();
+    if (trimmed && trimmed !== activeWorkflowName) {
+      setActiveWorkflowName(trimmed);
+    }
+    setIsEditingName(false);
+  };
+
+  // Keyboard shortcut for save
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+        e.preventDefault();
+        handleSave();
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleSave]);
 
   // Close user menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as globalThis.Node)) {
         setShowUserMenu(false);
       }
     }
@@ -42,11 +103,14 @@ export function Toolbar() {
   const handleExport = async () => {
     const yaml = await exportToYaml();
     setYamlContent(yaml);
-    setShowYaml(true);
+    const js = generateJavaScript(nodes, edges);
+    setJsContent(js);
+    setShowExport(true);
   };
 
-  const handleCopyYaml = () => {
-    navigator.clipboard.writeText(yamlContent);
+  const handleCopy = () => {
+    const content = exportTab === "yaml" ? yamlContent : jsContent;
+    navigator.clipboard.writeText(content);
   };
 
   const handleLogout = async () => {
@@ -72,6 +136,22 @@ export function Toolbar() {
     <>
       <div className="h-14 bg-white dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700 flex items-center justify-between px-4">
         <div className="flex items-center gap-4">
+          {/* My Workflows button */}
+          <button
+            onClick={toggleLibrary}
+            className="p-2 text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 hover:bg-gray-100 dark:hover:bg-zinc-700 rounded-md"
+            title="My Workflows"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h7"
+              />
+            </svg>
+          </button>
+
           <div className="flex items-baseline gap-2">
             <h1 className="text-xl font-bold text-gray-800 dark:text-white">floimg Studio</h1>
             <a
@@ -83,6 +163,42 @@ export function Toolbar() {
               by Flojo
             </a>
           </div>
+
+          {/* Workflow name and status - click to rename */}
+          <div className="flex items-center gap-2">
+            {isEditingName ? (
+              <input
+                type="text"
+                value={editingName}
+                onChange={(e) => setEditingName(e.target.value)}
+                onBlur={handleSaveRename}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSaveRename();
+                  if (e.key === "Escape") {
+                    setEditingName(activeWorkflowName);
+                    setIsEditingName(false);
+                  }
+                }}
+                className="w-48 px-2 py-1 text-sm font-medium bg-white dark:bg-zinc-900 border border-teal-500 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 text-gray-900 dark:text-zinc-100"
+                autoFocus
+              />
+            ) : (
+              <button
+                onClick={handleStartRename}
+                className="text-sm text-gray-700 dark:text-zinc-300 font-medium hover:text-gray-900 dark:hover:text-zinc-100 rounded px-2 py-1 -mx-2 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors"
+                title="Click to rename"
+              >
+                {activeWorkflowName}
+              </button>
+            )}
+            {hasUnsavedChanges && (
+              <span className="text-xs text-amber-600 dark:text-amber-400">(unsaved)</span>
+            )}
+            {notification && (
+              <span className="text-xs text-green-600 dark:text-green-400">{notification}</span>
+            )}
+          </div>
+
           <span className="text-sm text-gray-500 dark:text-zinc-400">
             {nodes.length} node{nodes.length !== 1 ? "s" : ""}
           </span>
@@ -155,8 +271,35 @@ export function Toolbar() {
             title="AI Settings"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+          </button>
+
+          {/* Save button */}
+          <button
+            onClick={handleSave}
+            disabled={nodes.length === 0}
+            className="p-2 text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 hover:bg-gray-100 dark:hover:bg-zinc-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Save Workflow (Cmd+S)"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+              />
             </svg>
           </button>
 
@@ -165,7 +308,7 @@ export function Toolbar() {
             disabled={nodes.length === 0}
             className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-zinc-200 bg-white dark:bg-zinc-700 border border-gray-300 dark:border-zinc-600 rounded-md hover:bg-gray-50 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Export YAML
+            Export
           </button>
 
           <button
@@ -175,11 +318,7 @@ export function Toolbar() {
           >
             {execution.status === "running" ? (
               <>
-                <svg
-                  className="animate-spin h-4 w-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
                   <circle
                     className="opacity-25"
                     cx="12"
@@ -198,12 +337,7 @@ export function Toolbar() {
               </>
             ) : (
               <>
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -259,22 +393,44 @@ export function Toolbar() {
         </div>
       )}
 
-      {/* YAML export modal */}
-      {showYaml && (
+      {/* Export modal with tabs */}
+      {showExport && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col">
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-zinc-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Exported Workflow (YAML)</h3>
+              <div className="flex items-center gap-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Export Workflow
+                </h3>
+                {/* Tabs */}
+                <div className="flex gap-1 bg-gray-100 dark:bg-zinc-700 rounded-lg p-1">
+                  <button
+                    onClick={() => setExportTab("yaml")}
+                    className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                      exportTab === "yaml"
+                        ? "bg-white dark:bg-zinc-600 text-gray-900 dark:text-white shadow-sm"
+                        : "text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white"
+                    }`}
+                  >
+                    YAML
+                  </button>
+                  <button
+                    onClick={() => setExportTab("javascript")}
+                    className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                      exportTab === "javascript"
+                        ? "bg-white dark:bg-zinc-600 text-gray-900 dark:text-white shadow-sm"
+                        : "text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white"
+                    }`}
+                  >
+                    JavaScript
+                  </button>
+                </div>
+              </div>
               <button
-                onClick={() => setShowYaml(false)}
+                onClick={() => setShowExport(false)}
                 className="text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200"
               >
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -286,22 +442,29 @@ export function Toolbar() {
             </div>
             <div className="p-4 overflow-auto flex-1">
               <pre className="bg-gray-100 dark:bg-zinc-900 p-4 rounded text-sm font-mono whitespace-pre-wrap text-gray-800 dark:text-zinc-200">
-                {yamlContent}
+                {exportTab === "yaml" ? yamlContent : jsContent}
               </pre>
             </div>
-            <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 dark:border-zinc-700">
-              <button
-                onClick={handleCopyYaml}
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-zinc-200 bg-white dark:bg-zinc-700 border border-gray-300 dark:border-zinc-600 rounded-md hover:bg-gray-50 dark:hover:bg-zinc-600"
-              >
-                Copy to Clipboard
-              </button>
-              <button
-                onClick={() => setShowYaml(false)}
-                className="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-md hover:bg-teal-700"
-              >
-                Close
-              </button>
+            <div className="flex justify-between items-center px-4 py-3 border-t border-gray-200 dark:border-zinc-700">
+              <span className="text-xs text-gray-500 dark:text-zinc-400">
+                {exportTab === "yaml"
+                  ? "Use with floimg CLI: floimg run workflow.yaml"
+                  : "Run with Node.js or Bun"}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleCopy}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-zinc-200 bg-white dark:bg-zinc-700 border border-gray-300 dark:border-zinc-600 rounded-md hover:bg-gray-50 dark:hover:bg-zinc-600"
+                >
+                  Copy to Clipboard
+                </button>
+                <button
+                  onClick={() => setShowExport(false)}
+                  className="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-md hover:bg-teal-700"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
