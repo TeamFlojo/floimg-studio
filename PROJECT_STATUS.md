@@ -4,19 +4,19 @@
 
 ## Current Focus
 
-### T-2025-001: Workflow Persistence and Code Export (PR #2)
+### T-2025-002: Remove Cloud Business Logic from Public Repo
 
-Enable save/load workflows to localStorage, add JavaScript code export.
+Make floimg-studio pure open-source by removing leaked cloud code.
 
-- [x] Add persist middleware to workflowStore
-- [x] Create WorkflowLibrary component
-- [x] Add JS tab to export modal
-- [x] Create codeGenerator utility
-- [x] Test and verify
-- [x] UX: Click-to-rename workflow name in toolbar
-- [x] UX: Toast notification on "New Workflow"
+- [x] Remove cloud imports/hooks from App.tsx
+- [x] Delete authStore.ts, useGuestUsage.ts, TOSConsent.tsx, AuthModal.tsx
+- [x] Update Toolbar (remove cloud user menu)
+- [x] Simplify backend moderator (remove FLOIMG_CLOUD detection)
+- [x] Test self-hosted mode (build passes)
 
 ## Recent Progress
+
+- **T-2025-001 Complete**: Workflow persistence and JS code export shipped
 
 - **AI Nodes & Settings**: Added vision and text generation to visual interface
   - VisionNode component for AI image analysis (GPT-4V, Claude, LLaVA)

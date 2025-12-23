@@ -5,9 +5,8 @@
  * SCAN BEFORE SAVE - Nothing touches disk without passing moderation.
  *
  * Configuration:
- * - OPENAI_API_KEY: Required for moderation to work
- * - MODERATION_STRICT_MODE: If "true", block content when moderation fails (default: true for cloud)
- * - FLOIMG_CLOUD: If "true", indicates cloud deployment (stricter policies)
+ * - OPENAI_API_KEY: Required for moderation to work (optional for self-hosted)
+ * - MODERATION_STRICT_MODE: If "true", block content when moderation fails (default: false)
  */
 
 import OpenAI from "openai";
@@ -43,8 +42,7 @@ export interface ModerationOptions {
 let openaiClient: OpenAI | null = null;
 
 // Configuration
-let strictMode = true;
-let isCloud = false;
+let strictMode = false;
 const INCIDENT_LOG_DIR = "./data/moderation";
 const INCIDENT_LOG_FILE = "incidents.jsonl";
 
@@ -55,31 +53,19 @@ const INCIDENT_LOG_FILE = "incidents.jsonl";
 export function initModeration(): boolean {
   const apiKey = process.env.OPENAI_API_KEY;
 
-  // Check if we're running in cloud mode
-  isCloud = process.env.FLOIMG_CLOUD === "true";
-
   // Strict mode: block content if moderation fails
-  // Default: true for cloud, configurable via env var
-  const strictEnv = process.env.MODERATION_STRICT_MODE;
-  if (strictEnv !== undefined) {
-    strictMode = strictEnv === "true";
-  } else {
-    strictMode = isCloud; // Cloud defaults to strict
-  }
+  // Default: false for self-hosted (permissive)
+  strictMode = process.env.MODERATION_STRICT_MODE === "true";
 
   if (!apiKey) {
     console.warn("[Moderation] OPENAI_API_KEY not set. Content moderation is DISABLED.");
     console.warn("[Moderation] Set OPENAI_API_KEY to enable automatic content scanning.");
-    if (isCloud) {
-      console.error("[Moderation] WARNING: Cloud mode without moderation is dangerous!");
-    }
     return false;
   }
 
   openaiClient = new OpenAI({ apiKey });
   console.log("[Moderation] Content moderation enabled with OpenAI Moderation API");
   console.log(`[Moderation] Strict mode: ${strictMode ? "ON" : "OFF"} (block on API failures)`);
-  console.log(`[Moderation] Cloud mode: ${isCloud ? "YES" : "NO"}`);
   return true;
 }
 
@@ -95,13 +81,6 @@ export function isModerationEnabled(): boolean {
  */
 export function isStrictModeEnabled(): boolean {
   return strictMode;
-}
-
-/**
- * Check if running in cloud mode
- */
-export function isCloudMode(): boolean {
-  return isCloud;
 }
 
 /**
