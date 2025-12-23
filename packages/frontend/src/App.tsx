@@ -6,6 +6,7 @@ import { NodeInspector } from "./components/NodeInspector";
 import { Toolbar } from "./components/Toolbar";
 import { Gallery } from "./components/Gallery";
 import { TemplateGallery } from "./components/TemplateGallery";
+import { WorkflowLibrary } from "./components/WorkflowLibrary";
 import { TOSConsent, useTOSConsent } from "./components/TOSConsent";
 import { AISettings } from "./components/AISettings";
 import { AuthModal } from "./components/AuthModal";
@@ -81,9 +82,7 @@ function App() {
         const definition: NodeDefinition = JSON.parse(data);
 
         // Get drop position relative to the canvas
-        const reactFlowBounds = document
-          .querySelector(".react-flow")
-          ?.getBoundingClientRect();
+        const reactFlowBounds = document.querySelector(".react-flow")?.getBoundingClientRect();
 
         if (!reactFlowBounds) return;
 
@@ -124,6 +123,9 @@ function App() {
 
       {/* Auth Modal - shown when guest needs to sign up */}
       <AuthModal />
+
+      {/* Workflow Library slide-out panel */}
+      <WorkflowLibrary />
 
       <div className="h-screen flex flex-col bg-gray-100 dark:bg-zinc-900">
         <Toolbar />
@@ -169,11 +171,7 @@ function App() {
           {activeTab === "editor" && (
             <>
               <NodePalette />
-              <div
-                className="flex-1"
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-              >
+              <div className="flex-1" onDrop={handleDrop} onDragOver={handleDragOver}>
                 <WorkflowEditor />
               </div>
               <NodeInspector />
