@@ -1,5 +1,11 @@
 # floimg-studio
 
+> **Archived**: This repository has been merged into the [floimg monorepo](https://github.com/TeamFlojo/floimg) at `apps/studio/`.
+>
+> For the latest version, see: https://github.com/TeamFlojo/floimg/tree/main/apps/studio
+
+---
+
 A visual drag-and-drop workflow builder for [floimg](https://github.com/TeamFlojo/floimg).
 
 Build image processing pipelines by connecting nodes on a canvas, then execute them to generate images.
@@ -87,19 +93,19 @@ floimg-studio/
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/health` | Health check |
-| GET | `/api/nodes/generators` | List available generators |
-| GET | `/api/nodes/transforms` | List available transforms |
-| POST | `/api/execute` | Execute a workflow |
-| POST | `/api/export/yaml` | Export workflow as YAML |
-| GET | `/api/images` | List generated images |
-| GET | `/api/images/:id/blob` | Get image blob |
-| POST | `/api/uploads` | Upload an image |
-| GET | `/api/uploads` | List uploaded images |
-| GET | `/api/uploads/:id/blob` | Get uploaded image blob |
-| DELETE | `/api/uploads/:id` | Delete an upload |
+| Method | Endpoint                | Description               |
+| ------ | ----------------------- | ------------------------- |
+| GET    | `/api/health`           | Health check              |
+| GET    | `/api/nodes/generators` | List available generators |
+| GET    | `/api/nodes/transforms` | List available transforms |
+| POST   | `/api/execute`          | Execute a workflow        |
+| POST   | `/api/export/yaml`      | Export workflow as YAML   |
+| GET    | `/api/images`           | List generated images     |
+| GET    | `/api/images/:id/blob`  | Get image blob            |
+| POST   | `/api/uploads`          | Upload an image           |
+| GET    | `/api/uploads`          | List uploaded images      |
+| GET    | `/api/uploads/:id/blob` | Get uploaded image blob   |
+| DELETE | `/api/uploads/:id`      | Delete an upload          |
 
 ## Usage
 
