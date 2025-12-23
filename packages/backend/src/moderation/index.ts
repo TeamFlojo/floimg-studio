@@ -9,7 +9,6 @@ export {
   initModeration,
   isModerationEnabled,
   isStrictModeEnabled,
-  isCloudMode,
   moderateText,
   moderateImage,
   moderateContent,
